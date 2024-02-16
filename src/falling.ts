@@ -1,8 +1,10 @@
 import { elements } from "./elements";
 
-let currentArr: string[];
-let newArr: string[];
-export let framerate = 1000 / 1000;
+let curPartArr: string[];
+let newPartArr: string[];
+let curVelArr: number[];
+let newVelArr: number[];
+export let framerate = 1000 / 100;
 var timer: number | undefined = undefined;
 
 let charSelect = document.getElementById("char") as HTMLInputElement;
@@ -17,6 +19,12 @@ export let dimensions = {
     rows: 0,
     charWidth: 0,
     charHeight: 0,
+};
+
+export const loop = () => {
+    gravity();
+    writetoDom();
+    curPartArr = newPartArr.slice(0);
 };
 
 export const stringOutput = (indicator: number[], canvasSize: DOMRect) => {
@@ -47,19 +55,21 @@ export const reset = () => {
     if (canvas) {
         clickDetect(canvas);
         let canvasSize = canvas.getBoundingClientRect();
-        currentArr = stringOutput(indicator, canvasSize);
-        newArr = currentArr.slice(0);
+        curPartArr = stringOutput(indicator, canvasSize);
+        newPartArr = curPartArr.slice(0);
+        curVelArr = new Array(dimensions.columns * dimensions.rows).fill("0");
+        newVelArr = curVelArr.slice(0)
         writetoDom();
     }
 };
 
 export const writetoDom = () => {
     let canvas = document.getElementById("Canvas");
-    if(newArr == currentArr){
-        return
+    if (newPartArr == curPartArr) {
+        return;
     }
     if (canvas) {
-        let string = newArr.join("");
+        let string = newPartArr.join("");
         canvas.innerHTML = string;
     }
 };
@@ -97,8 +107,13 @@ const mouseEvents = (pos: number[]) => {
     for (let x = -size + 1; x < size; x++) {
         for (let y = -size + 1; y < size; y++) {
             let pos = x * dimensions.columns + y + index;
-            if (checkInGrid(pos) && Math.floor(index/dimensions.columns) == Math.floor(pos/dimensions.columns)+ -x && Math.random() > 0.5) {
-                newArr[pos] = char;
+            if (
+                checkInGrid(pos) &&
+                Math.floor(index / dimensions.columns) == Math.floor(pos / dimensions.columns) + -x &&
+                Math.random() > 0.9 &&
+                Math.abs(x * y) < size - 1
+            ) {
+                newPartArr[pos] = char;
             }
         }
     }
@@ -108,25 +123,20 @@ const checkInGrid = (index: number) => {
     return index > 0 && index < dimensions.columns * dimensions.rows;
 };
 
-export const loop = () => {
-    gravity();
-    writetoDom();
-    currentArr = newArr.slice(0);
-};
-
 const gravity = () => {
-    for (let x = 0; x < currentArr.length; x++) {
-        let el = elements[currentArr[x]];
+    for (let x = 0; x < curPartArr.length; x++) {
+        let el = elements[curPartArr[x].toLowerCase()];
+        let vol = curVelArr[x] + el.acc;
         if (el.graved) {
-            let dancePartner = south(x, currentArr);
+            let dancePartner = south(x, curPartArr);
             if (dancePartner && dancePartner.el.movable) {
                 swap(x, dancePartner.i);
             } else {
-                let dancePartner = southWest(x, currentArr);
+                let dancePartner = southWest(x, curPartArr);
                 if (dancePartner && dancePartner.el.movable) {
                     swap(x, dancePartner.i);
                 } else {
-                    let dancePartner = southEast(x, currentArr);
+                    let dancePartner = southEast(x, curPartArr);
                     if (dancePartner && dancePartner.el.movable) {
                         swap(x, dancePartner.i);
                     }
@@ -137,8 +147,8 @@ const gravity = () => {
 };
 
 const swap = (a: number, b: number) => {
-    newArr[a] = currentArr[b];
-    newArr[b] = currentArr[a];
+    newPartArr[a] = Math.random() > 0.5 ? curPartArr[b].toLowerCase() :  curPartArr[b].toUpperCase();
+    newPartArr[b] = Math.random() > 0.5 ? curPartArr[a].toLowerCase() :  curPartArr[a].toUpperCase();
 };
 
 const south = (index: number, arr: string[]) => {
