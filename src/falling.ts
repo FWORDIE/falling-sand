@@ -2,7 +2,6 @@ import { elements } from "./elements";
 
 let currentArr: string[];
 let newArr: string[];
-let n: number = 0;
 export let framerate = 1000 / 24;
 var timer: number | undefined = undefined;
 
@@ -141,7 +140,7 @@ const swap = (a: number, b: number) => {
 
 const south = (index: number, arr: string[]) => {
     let i = index + dimensions.columns;
-    let el = elements[currentArr[i]];
+    let el = elements[arr[i]];
     if (el) {
         return { i: i, el: el };
     }
@@ -153,7 +152,7 @@ const southWest = (index: number, arr: string[]) => {
         return false;
     }
     let i = index + dimensions.columns - 1;
-    let el = elements[currentArr[i]];
+    let el = elements[arr[i]];
     if (el) {
         return { i: i, el: el };
     }
@@ -166,7 +165,7 @@ const southEast = (index: number, arr: string[]) => {
     }
     // console.log('east', index % dimensions.columns)
     let i = index + dimensions.columns + 1;
-    let el = elements[currentArr[i]];
+    let el = elements[arr[i]];
     if (el) {
         return { i: i, el: el };
     }
