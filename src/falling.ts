@@ -2,7 +2,7 @@ import { elements } from "./elements";
 
 let currentArr: string[];
 let newArr: string[];
-export let framerate = 1000 / 24;
+export let framerate = 1000 / 1000;
 var timer: number | undefined = undefined;
 
 let charSelect = document.getElementById("char") as HTMLInputElement;
@@ -55,6 +55,9 @@ export const reset = () => {
 
 export const writetoDom = () => {
     let canvas = document.getElementById("Canvas");
+    if(newArr == currentArr){
+        return
+    }
     if (canvas) {
         let string = newArr.join("");
         canvas.innerHTML = string;
