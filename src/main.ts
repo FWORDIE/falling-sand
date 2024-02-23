@@ -1,8 +1,11 @@
 import "./style.scss";
-import { framerate,  loop, reset} from "./falling.ts";
-
+import { framerate, handleKey, loop, reset, startUp } from "./falling.ts";
 
 window.addEventListener("load", () => {
-    reset()
-    setInterval(loop, framerate)
+    startUp();
+    setInterval(loop, framerate);
+});
+
+window.addEventListener("keydown", (e) => {
+    handleKey(e);
 });

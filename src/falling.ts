@@ -4,11 +4,14 @@ let curPartArr: string[];
 let newPartArr: string[];
 let curVelArr: number[];
 let newVelArr: number[];
-export let framerate = 1000 / 100;
+let paused = false;
+export let framerate = 1000 / 60;
 var timer: number | undefined = undefined;
 
 let charSelect = document.getElementById("char") as HTMLInputElement;
 let sizeSelect = document.getElementById("size") as HTMLInputElement;
+let pausedSelect = document.getElementById("paused") as HTMLInputElement;
+let showVelSelect = document.getElementById("showVel") as HTMLInputElement;
 
 export let dimensions = {
     canvasWidth: 0,
@@ -22,9 +25,22 @@ export let dimensions = {
 };
 
 export const loop = () => {
+    if (!pausedSelect.checked) {
+        sim();
+    }
+};
+
+const sim = () => {
     gravity();
     writetoDom();
     curPartArr = newPartArr.slice(0);
+    curVelArr = newVelArr.slice(0);
+};
+
+export const handleKey = (e: KeyboardEvent) => {
+    if ((e as KeyboardEvent).key === "ArrowRight") {
+        sim();
+    }
 };
 
 export const stringOutput = (indicator: number[], canvasSize: DOMRect) => {
@@ -57,9 +73,25 @@ export const reset = () => {
         let canvasSize = canvas.getBoundingClientRect();
         curPartArr = stringOutput(indicator, canvasSize);
         newPartArr = curPartArr.slice(0);
-        curVelArr = new Array(dimensions.columns * dimensions.rows).fill("0");
-        newVelArr = curVelArr.slice(0)
+        curVelArr = new Array(dimensions.columns * dimensions.rows).fill(0);
+        newVelArr = curVelArr.slice(0);
         writetoDom();
+    }
+};
+
+export const startUp = () => {
+    reset();
+    addOptions();
+};
+
+const addOptions = () => {
+    let select = document.getElementById("char") as HTMLSelectElement;
+
+    for (let key in elements) {
+        let opt = document.createElement("option");
+        opt.value = key;
+        opt.innerHTML = elements[key].name;
+        select.appendChild(opt);
     }
 };
 
@@ -68,9 +100,13 @@ export const writetoDom = () => {
     if (newPartArr == curPartArr) {
         return;
     }
+    let visArr: string[] | number[] = newPartArr;
+    if (showVelSelect.checked) {
+        visArr = newVelArr;
+    }
     if (canvas) {
-        let string = newPartArr.join("");
-        canvas.innerHTML = string;
+        let string = visArr.join("");
+        canvas.textContent = string;
     }
 };
 
@@ -103,19 +139,24 @@ const mouseEvents = (pos: number[]) => {
 
     //get options
     let char = charSelect?.value || "s";
+    char = Math.random() > 0.5 ? char.toUpperCase() : char;
     let size = +sizeSelect?.value || 1;
-    for (let x = -size + 1; x < size; x++) {
-        for (let y = -size + 1; y < size; y++) {
-            let pos = x * dimensions.columns + y + index;
-            if (
-                checkInGrid(pos) &&
-                Math.floor(index / dimensions.columns) == Math.floor(pos / dimensions.columns) + -x &&
-                Math.random() > 0.9 &&
-                Math.abs(x * y) < size - 1
-            ) {
-                newPartArr[pos] = char;
+    if (size > 1) {
+        for (let x = -size + 1; x < size; x++) {
+            for (let y = -size + 1; y < size; y++) {
+                let pos = x * dimensions.columns + y + index;
+                if (
+                    checkInGrid(pos) &&
+                    Math.floor(index / dimensions.columns) == Math.floor(pos / dimensions.columns) + -x &&
+                    Math.random() > 0.5 &&
+                    Math.abs(x * y) < size - 1
+                ) {
+                    newPartArr[pos] = char;
+                }
             }
         }
+    } else {
+        newPartArr[index] = char;
     }
 };
 
@@ -124,35 +165,54 @@ const checkInGrid = (index: number) => {
 };
 
 const gravity = () => {
-    for (let x = 0; x < curPartArr.length; x++) {
+    for (let x = curPartArr.length - 1; x > 0; x--) {
         let el = elements[curPartArr[x].toLowerCase()];
-        let vol = curVelArr[x] + el.acc;
         if (el.graved) {
-            let dancePartner = south(x, curPartArr);
-            if (dancePartner && dancePartner.el.movable) {
-                swap(x, dancePartner.i);
+            //check below
+            let directBelow = south(x, 1, curPartArr);
+            let moved = false;
+            if (directBelow && directBelow.el.movable) {
+                curVelArr[x] += el.acc;
+                if (curVelArr[x] > el.max) {
+                    curVelArr[x] = el.max;
+                }
+                for (let dis = Math.floor(curVelArr[x]); dis > 0; dis--) {
+                    let dancePartner = south(x, dis, curPartArr);
+                    if (dancePartner && dancePartner.el.movable && !moved) {
+                        swap(x, dancePartner.i);
+                        moved = true;
+                    }
+                }
             } else {
+                curVelArr[x] = 0;
                 let dancePartner = southWest(x, curPartArr);
                 if (dancePartner && dancePartner.el.movable) {
                     swap(x, dancePartner.i);
+                    moved = true;
                 } else {
                     let dancePartner = southEast(x, curPartArr);
                     if (dancePartner && dancePartner.el.movable) {
                         swap(x, dancePartner.i);
+                        moved = true;
                     }
                 }
+            }
+            if (!moved) {
+                newVelArr[x] = curVelArr[x];
             }
         }
     }
 };
 
 const swap = (a: number, b: number) => {
-    newPartArr[a] = Math.random() > 0.5 ? curPartArr[b].toLowerCase() :  curPartArr[b].toUpperCase();
-    newPartArr[b] = Math.random() > 0.5 ? curPartArr[a].toLowerCase() :  curPartArr[a].toUpperCase();
+    newPartArr[a] = Math.random() > 0.5 ? curPartArr[b].toLowerCase() : curPartArr[b].toUpperCase();
+    newPartArr[b] = Math.random() > 0.5 ? curPartArr[a].toLowerCase() : curPartArr[a].toUpperCase();
+    newVelArr[a] = curVelArr[b];
+    newVelArr[b] = curVelArr[a];
 };
 
-const south = (index: number, arr: string[]) => {
-    let i = index + dimensions.columns;
+const south = (index: number, dis: number, arr: string[]) => {
+    let i = index + dimensions.columns * dis;
     let el = elements[arr[i]];
     if (el) {
         return { i: i, el: el };
@@ -176,7 +236,6 @@ const southEast = (index: number, arr: string[]) => {
     if ((index % dimensions.columns) + 1 >= dimensions.columns) {
         return false;
     }
-    // console.log('east', index % dimensions.columns)
     let i = index + dimensions.columns + 1;
     let el = elements[arr[i]];
     if (el) {
