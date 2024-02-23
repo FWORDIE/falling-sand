@@ -1,12 +1,5 @@
 export let elements:{[key: string]: any} ={
-    '·':{
-        name:'air',
-        movable:true,
-        graved:false,
-        acc:0,
-        max:8,
-        selectale: true
-    },
+
     's':{
         name:'sand',
         movable:false,
@@ -21,6 +14,14 @@ export let elements:{[key: string]: any} ={
         graved:false,
         acc:0,
         max:0,
+        selectale: true
+    },
+    '·':{
+        name:'air',
+        movable:true,
+        graved:false,
+        acc:0,
+        max:8,
         selectale: true
     }
 }

@@ -4,6 +4,9 @@ let curPartArr: string[];
 let newPartArr: string[];
 let curVelArr: number[];
 let newVelArr: number[];
+let southArr: number[] | false[] = [];
+let southEastArr: number[] | false[] = [];
+let southWestArr: number[] | false[] = [];
 let paused = false;
 export let framerate = 1000 / 60;
 var timer: number | undefined = undefined;
@@ -22,6 +25,7 @@ export let dimensions = {
     rows: 0,
     charWidth: 0,
     charHeight: 0,
+    total: 0,
 };
 
 export const loop = () => {
@@ -54,6 +58,7 @@ export const stringOutput = (indicator: number[], canvasSize: DOMRect) => {
         charHeight: indicator[1],
         columns: Math.floor(canvasSize.width / indicator[0]),
         rows: Math.floor(canvasSize.height / indicator[1]),
+        total: Math.floor(canvasSize.height / indicator[1]) * Math.floor(canvasSize.width / indicator[0]),
     };
     let str = new Array(dimensions.columns * dimensions.rows).fill("·");
     return str;
@@ -75,7 +80,16 @@ export const reset = () => {
         newPartArr = curPartArr.slice(0);
         curVelArr = new Array(dimensions.columns * dimensions.rows).fill(0);
         newVelArr = curVelArr.slice(0);
+        createDirectionArrays();
         writetoDom();
+    }
+};
+
+const createDirectionArrays = () => {
+    for (let i = 0; i < dimensions.total; i++) {
+        southArr[i] = getSouth(i);
+        southEastArr[i] = getSouthEast(i);
+        southWestArr[i] = getSouthWest(i);
     }
 };
 
@@ -165,46 +179,98 @@ const checkInGrid = (index: number) => {
 };
 
 const gravity = () => {
+    // for (let x = curPartArr.length - 1; x > 0; x--) {
+    //     let el = elements[curPartArr[x].toLowerCase()];
+    //     if (el.graved) {
+    //         //check below
+    //         let directBelow = south(x, 1, curPartArr);
+    //         let moved = false;
+    //         if (directBelow && directBelow.movable) {
+    //             curVelArr[x] += el.acc;
+    //             if (curVelArr[x] > el.max) {
+    //                 curVelArr[x] = el.max;
+    //             }
+    //             for (let dis = Math.floor(curVelArr[x]); dis > 0; dis--) {
+    //                 let dancePartner = south(x, dis, curPartArr);
+    //                 if (dancePartner && dancePartner.el.movable && !moved) {
+    //                     swap(x, dancePartner.i);
+    //                     moved = true;
+    //                 }
+    //             }
+    //         } else {
+    //             curVelArr[x] = 0;
+    //             let dancePartner = southWest(x, curPartArr);
+    //             if (dancePartner && dancePartner.el.movable) {
+    //                 swap(x, dancePartner.i);
+    //                 moved = true;
+    //             } else {
+    //                 let dancePartner = southEast(x, curPartArr);
+    //                 if (dancePartner && dancePartner.el.movable) {
+    //                     swap(x, dancePartner.i);
+    //                     moved = true;
+    //                 }
+    //             }
+    //         }
+    //         if (!moved) {
+    //             newVelArr[x] = curVelArr[x];
+    //         }
+    //     }
+    // }
     for (let x = curPartArr.length - 1; x > 0; x--) {
         let el = elements[curPartArr[x].toLowerCase()];
         if (el.graved) {
             //check below
-            let directBelow = south(x, 1, curPartArr);
-            let moved = false;
-            if (directBelow && directBelow.el.movable) {
-                curVelArr[x] += el.acc;
-                if (curVelArr[x] > el.max) {
-                    curVelArr[x] = el.max;
-                }
-                for (let dis = Math.floor(curVelArr[x]); dis > 0; dis--) {
-                    let dancePartner = south(x, dis, curPartArr);
-                    if (dancePartner && dancePartner.el.movable && !moved) {
-                        swap(x, dancePartner.i);
-                        moved = true;
+            let directBelowIndex = southArr[x];
+            if (directBelowIndex) {
+                let directBelow = elements[curPartArr[directBelowIndex].toLowerCase()];
+                let moved = false;
+                if (directBelow.movable) {
+                    curVelArr[x] += el.acc;
+                    if (curVelArr[x] > el.max) {
+                        curVelArr[x] = el.max;
                     }
-                }
-            } else {
-                curVelArr[x] = 0;
-                let dancePartner = southWest(x, curPartArr);
-                if (dancePartner && dancePartner.el.movable) {
-                    swap(x, dancePartner.i);
-                    moved = true;
+                    for (let dis = Math.floor(curVelArr[x]); dis >= 0 && !moved; dis--) {
+                        let dancePartnerIndex = southArr[x + dimensions.columns * dis];
+                        if (dancePartnerIndex) {
+                            let dancePartner = elements[curPartArr[dancePartnerIndex].toLowerCase()];
+                            if (dancePartner.movable && !moved) {
+                                swap(x, dancePartnerIndex);
+                                moved = true;
+                            }
+                        }
+                    }
                 } else {
-                    let dancePartner = southEast(x, curPartArr);
-                    if (dancePartner && dancePartner.el.movable) {
-                        swap(x, dancePartner.i);
-                        moved = true;
+                    curVelArr[x] = 0;
+                    let dancePartnerIndex = southWestArr[x];
+                    if (dancePartnerIndex) {
+                        let dancePartner = elements[curPartArr[dancePartnerIndex].toLowerCase()];
+                        if (dancePartner.movable) {
+                            swap(x, dancePartnerIndex);
+                            moved = true;
+                        }
+                    }
+                    if(!moved){
+                        dancePartnerIndex = southEastArr[x];
+                        if (dancePartnerIndex) {
+                            let dancePartner = elements[curPartArr[dancePartnerIndex].toLowerCase()];
+                            if (dancePartner.movable) {
+                                swap(x, dancePartnerIndex);
+                                moved = true;
+                            }
+                        }
+
                     }
                 }
-            }
-            if (!moved) {
-                newVelArr[x] = curVelArr[x];
+                if (!moved) {
+                    newVelArr[x] = curVelArr[x];
+                }
             }
         }
     }
 };
 
 const swap = (a: number, b: number) => {
+    console.log('swapping')
     newPartArr[a] = Math.random() > 0.5 ? curPartArr[b].toLowerCase() : curPartArr[b].toUpperCase();
     newPartArr[b] = Math.random() > 0.5 ? curPartArr[a].toLowerCase() : curPartArr[a].toUpperCase();
     newVelArr[a] = curVelArr[b];
@@ -242,4 +308,28 @@ const southEast = (index: number, arr: string[]) => {
         return { i: i, el: el };
     }
     return false;
+};
+
+const getSouth = (i: number) => {
+    let result = i + dimensions.columns;
+    if (result >= dimensions.total) {
+        return false;
+    }
+    return result;
+};
+
+const getSouthWest = (i: number) => {
+    let result = i + dimensions.columns - 1;
+    if ((i % dimensions.columns) - 1 < 0 || result > dimensions.total) {
+        return false;
+    }
+    return result;
+};
+
+const getSouthEast = (i: number) => {
+    let result = i + dimensions.columns + 1;
+    if ((i % dimensions.columns) + 1 >= dimensions.columns || result > dimensions.total) {
+        return false;
+    }
+    return result;
 };
