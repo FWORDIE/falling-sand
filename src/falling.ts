@@ -179,43 +179,6 @@ const checkInGrid = (index: number) => {
 };
 
 const gravity = () => {
-    // for (let x = curPartArr.length - 1; x > 0; x--) {
-    //     let el = elements[curPartArr[x].toLowerCase()];
-    //     if (el.graved) {
-    //         //check below
-    //         let directBelow = south(x, 1, curPartArr);
-    //         let moved = false;
-    //         if (directBelow && directBelow.movable) {
-    //             curVelArr[x] += el.acc;
-    //             if (curVelArr[x] > el.max) {
-    //                 curVelArr[x] = el.max;
-    //             }
-    //             for (let dis = Math.floor(curVelArr[x]); dis > 0; dis--) {
-    //                 let dancePartner = south(x, dis, curPartArr);
-    //                 if (dancePartner && dancePartner.el.movable && !moved) {
-    //                     swap(x, dancePartner.i);
-    //                     moved = true;
-    //                 }
-    //             }
-    //         } else {
-    //             curVelArr[x] = 0;
-    //             let dancePartner = southWest(x, curPartArr);
-    //             if (dancePartner && dancePartner.el.movable) {
-    //                 swap(x, dancePartner.i);
-    //                 moved = true;
-    //             } else {
-    //                 let dancePartner = southEast(x, curPartArr);
-    //                 if (dancePartner && dancePartner.el.movable) {
-    //                     swap(x, dancePartner.i);
-    //                     moved = true;
-    //                 }
-    //             }
-    //         }
-    //         if (!moved) {
-    //             newVelArr[x] = curVelArr[x];
-    //         }
-    //     }
-    // }
     for (let x = curPartArr.length - 1; x > 0; x--) {
         let el = elements[curPartArr[x].toLowerCase()];
         if (el.graved) {
@@ -270,44 +233,10 @@ const gravity = () => {
 };
 
 const swap = (a: number, b: number) => {
-    console.log('swapping')
     newPartArr[a] = Math.random() > 0.5 ? curPartArr[b].toLowerCase() : curPartArr[b].toUpperCase();
     newPartArr[b] = Math.random() > 0.5 ? curPartArr[a].toLowerCase() : curPartArr[a].toUpperCase();
     newVelArr[a] = curVelArr[b];
     newVelArr[b] = curVelArr[a];
-};
-
-const south = (index: number, dis: number, arr: string[]) => {
-    let i = index + dimensions.columns * dis;
-    let el = elements[arr[i]];
-    if (el) {
-        return { i: i, el: el };
-    }
-    return false;
-};
-
-const southWest = (index: number, arr: string[]) => {
-    if ((index % dimensions.columns) - 1 < 0) {
-        return false;
-    }
-    let i = index + dimensions.columns - 1;
-    let el = elements[arr[i]];
-    if (el) {
-        return { i: i, el: el };
-    }
-    return false;
-};
-
-const southEast = (index: number, arr: string[]) => {
-    if ((index % dimensions.columns) + 1 >= dimensions.columns) {
-        return false;
-    }
-    let i = index + dimensions.columns + 1;
-    let el = elements[arr[i]];
-    if (el) {
-        return { i: i, el: el };
-    }
-    return false;
 };
 
 const getSouth = (i: number) => {
@@ -320,7 +249,7 @@ const getSouth = (i: number) => {
 
 const getSouthWest = (i: number) => {
     let result = i + dimensions.columns - 1;
-    if ((i % dimensions.columns) - 1 < 0 || result > dimensions.total) {
+    if ((i % dimensions.columns) - 1 < 0 || result >= dimensions.total) {
         return false;
     }
     return result;
@@ -328,8 +257,25 @@ const getSouthWest = (i: number) => {
 
 const getSouthEast = (i: number) => {
     let result = i + dimensions.columns + 1;
-    if ((i % dimensions.columns) + 1 >= dimensions.columns || result > dimensions.total) {
+    if ((i % dimensions.columns) + 1 >= dimensions.columns || result >= dimensions.total) {
         return false;
     }
     return result;
 };
+
+const getEast = (i: number) => {
+    let result = i+ 1;
+    if ((i % dimensions.columns) + 1 >= dimensions.columns || result >= dimensions.total) {
+        return false;
+    }
+    return result;
+};
+
+const getWest = (i: number) => {
+    let result = i+ 1;
+    if ((i % dimensions.columns) + 1 >= dimensions.columns || result <= 0) {
+        return false;
+    }
+    return result;
+};
+
