@@ -1,5 +1,5 @@
 import "./style.scss";
-import { framerate, handleKey, loop, reset, startUp } from "./falling.ts";
+import { framerate, handleKey, loop, startUp } from "./falling.ts";
 
 window.addEventListener("load", () => {
     startUp();
