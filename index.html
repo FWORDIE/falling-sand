@@ -18,18 +18,26 @@
                     </div>
                     <div class="option">
                         <label for="size">size</label>
-                        <input type="range" id="size" name="size" min="1" max="5" value="1" />
+                        <input type="range" id="size" name="size" min="1" max="5" value="1"  />
+                    </div>
+                    <div class="option">
+                        <label for="font">font</label>
+                        <input type="range" id="font" name="font" min="8" max="24" value="2" />
                     </div>
                     <div class="option">
                         <label for="paused">paused</label>
                         <input type="checkbox" name="paused" id="paused">
                     </div>
                     <div class="option">
+                        <label for="debug">debug</label>
+                        <input type="checkbox" name="debug" id="debug">
+                    </div>
+                    <div class="option">
                         <label for="showVel">showVel</label>
                         <input type="checkbox" name="showVel" id="showVel">
                     </div>
                 </div>
-                <div class="canvas" id="Canvas"><div id="Indicator">X</div></div>
+                <div id="Indicator">X</div><div id="Canvas" class="canvas"></div>
             </main>
         </div>
         <script type="module" src="/src/main.ts"></script>
