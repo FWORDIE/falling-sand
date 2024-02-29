@@ -243,7 +243,10 @@ const doEffects = (x: number) => {
     let moved = false;
     const el = elements[curSymbolArr[x].toLowerCase()];
     if (el.graved) moved = gravity(x, el);
-    if (el.liquidy && !moved) slide(x);
+    if (el.liquidy && !moved) moved = slide(x);
+
+    if(!moved) casePass(x)
+    
 };
 
 const slide = (x: number) => {
@@ -255,7 +258,9 @@ const slide = (x: number) => {
 
     if (chosenDancePartner) {
         swap(x, chosenDancePartner);
+        return true
     }
+    return false
 };
 
 const gravity = (x: number, el: element) => {
@@ -285,7 +290,7 @@ const gravity = (x: number, el: element) => {
 
             const chosenDancePartner = randomBetweenTwo(dancePartnerIndexsouthEastMatch, dancePartnerIndexsouthWestMatch);
 
-            if (chosenDancePartner) {
+            if (chosenDancePartner && randomNumCheck(1 - el.friction)) {
                 swap(x, chosenDancePartner);
                 return true;
             }
@@ -294,6 +299,12 @@ const gravity = (x: number, el: element) => {
     curVelArr[x] = 0;
     return false;
 };
+
+const casePass = (x:number)=>{
+    if(curVelArr[x] === 0){
+        curSymbolArr[x] = curSymbolArr[x].toUpperCase()
+    }
+}
 
 // HELPERS
 const swap = (a: number, b: number) => {

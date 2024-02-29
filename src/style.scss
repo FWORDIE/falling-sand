@@ -1,5 +1,5 @@
 :root {
-    font-family: "IBM Plex Mono";
+    font-family: "Bergen Mono";
     font-weight: bolder;
     line-height: 1.5;
     font-weight: 400;
@@ -44,6 +44,7 @@ main {
         -moz-user-select: -moz-none;
         -khtml-user-select: none;
         -webkit-user-select: none;
+        // text-transform: lowercase;
     }
     #Indicator {
         position: absolute;
@@ -53,4 +54,12 @@ main {
 
 
     }
+}
+
+
+@font-face {
+    font-family: 'Bergen Mono';
+    font-style: normal;
+    font-weight: 300;
+    src: url('fonts/BergenMono-Regular.woff2') format('woff2');
 }

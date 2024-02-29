@@ -5,6 +5,7 @@ export let elements: { [key: string]: element } = {
         acc: 0.3,
         max: 8,
         density: 99,
+        friction: 0.5
     },
     w: {
         name: "Water",
@@ -13,6 +14,7 @@ export let elements: { [key: string]: element } = {
         density: 10,
         acc: 0.3,
         max: 8,
+        friction: 0.1
     },
     r: {
         name: "Rock",
@@ -20,6 +22,7 @@ export let elements: { [key: string]: element } = {
         density: 99,
         acc: 0,
         max: 0,
+        friction: 0.1
     },
     "·": {
         name: "Air",
@@ -27,6 +30,7 @@ export let elements: { [key: string]: element } = {
         density: 0,
         acc: 0,
         max: 8,
+        friction: 0.1
     },
 };
 
@@ -37,4 +41,5 @@ export type element = {
     liquidy?: boolean;
     acc: number;
     max: number;
+    friction:number;
 };
