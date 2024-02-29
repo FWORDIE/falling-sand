@@ -105,13 +105,27 @@ const clickDetect = (main: HTMLElement) => {
         }, framerate);
     });
 
+    main.addEventListener("touchstart", (e: TouchEvent) => {
+        let pos = [e.touches[0].clientX - dimensions.canvasLeft, e.touches[0].clientY - dimensions.canvasTop];
+        window.addEventListener("touchmove", (e) => {
+            pos = [e.touches[0].clientX - dimensions.canvasLeft, e.touches[0].clientY- dimensions.canvasTop];
+        });
+        timer = setInterval(function () {
+            mouseEvents(pos);
+        }, framerate);
+    });
+
     function mouseDone() {
         clearInterval(timer);
         window.removeEventListener("mousemove", () => {});
+        window.removeEventListener("touchmove", () => {});
     }
 
     main.addEventListener("mouseup", mouseDone);
     main.addEventListener("mouseleave", mouseDone);
+    main.addEventListener("touchcancel", mouseDone);
+    main.addEventListener("touchend", mouseDone);
+
 };
 
 const mouseEvents = (pos: number[]) => {
