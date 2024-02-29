@@ -63,15 +63,16 @@ const sim = () => {
 };
 
 const writetoDom = () => {
-    if (newSymbolArr == oldSymbolArr) {
-        return;
-    }
+    // TODO seems to stop loop so nothing updates, should just stop rendering
+    // if (newSymbolArr == oldSymbolArr) {
+    //     return;
+    // }
     let visArr: string[] | number[] = newSymbolArr;
     if (showVelSelect.checked) {
         visArr = curVelArr;
     }
     if (canvas) {
-        let string = visArr.join("");
+        const string = visArr.join("");
         oldSymbolArr = newSymbolArr.slice(0);
         canvas.textContent = string;
     }
