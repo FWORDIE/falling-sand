@@ -17,7 +17,7 @@ let fontSize: number = 16;
 const randomArrAmount = 100;
 let randomArrNum = 0;
 
-export let framerate = 1000 / 60;
+export let framerate = 1000 / 24;
 var timer: number | undefined = undefined;
 
 var charSelect = document.getElementById("char") as HTMLInputElement;
@@ -258,8 +258,10 @@ const iterateOver = () => {
 const doEffects = (x: number) => {
     let moved = false;
     const el = curSymbolArr[x];
+    if (el.acidic) acid(x, el);
     if (el.graved) moved = gravity(x, el);
     if (el.liquidy && !moved) moved = slide(x, el);
+    if (el.halfLife) decay(x, el);
     if (!moved) casePass(x);
 };
 
@@ -294,7 +296,7 @@ const gravity = (x: number, el: element) => {
                     return true;
                 }
             }
-        } else if(!el.nonslide){
+        } else if (!el.nonslide) {
             const dancePartnerIndexSouthWest = southWestArr[x];
             const dancePartnerIndexsouthEast = southEastArr[x];
             const dancePartnerIndexsouthWestMatch =
@@ -314,6 +316,38 @@ const gravity = (x: number, el: element) => {
     return false;
 };
 
+const decay = (x: number, el: element) => {
+    // For for when we have all elements
+    // const alphabet = 'abcdefghijklmnopqrstuvwxyz'
+    // const max = alphabet.indexOf(el.symbol.toLowerCase())
+    // const firstelement = randomIntFromInterval(0,max || alphabet.length)
+    // console.log(firstelement)
+};
+
+const acid = (x: number, el: element) => {
+    const directBelowIndex = southArr[x];
+    if (directBelowIndex) {
+        const directBelow = curSymbolArr[directBelowIndex];
+        if (!directBelow.nonDestructable) {
+            destroy(x);
+            destroy(directBelowIndex)
+            return true
+        }
+    }
+    const dancePartnerWestIndex = westArr[x];
+    const dancePartnerEastIndex = eastArr[x];
+    const dancePartnerWestMatch = dancePartnerWestIndex && !curSymbolArr[dancePartnerWestIndex].nonDestructable ? dancePartnerWestIndex : false;
+    const dancePartnerEastMatch = dancePartnerEastIndex && !curSymbolArr[dancePartnerEastIndex].nonDestructable ? dancePartnerEastIndex : false;
+    const chosenDancePartner = randomBetweenTwo(dancePartnerWestMatch, dancePartnerEastMatch);
+
+    if (chosenDancePartner) {
+        destroy(x);
+        destroy(chosenDancePartner)
+        return true;
+    }
+    return false;
+};
+
 const casePass = (x: number) => {
     curSymbolArr[x].symbol = curSymbolArr[x].symbol.toUpperCase();
 };
@@ -325,6 +359,10 @@ const swap = (a: number, b: number) => {
     curSymbolArr[b] = temp;
     curSymbolArr[a].symbol = randomNumCheck() ? curSymbolArr[a].symbol.toUpperCase() : curSymbolArr[a].symbol.toLowerCase();
     curSymbolArr[b].symbol = randomNumCheck() ? curSymbolArr[b].symbol.toUpperCase() : curSymbolArr[b].symbol.toLowerCase();
+};
+
+const destroy = (x: number) => {
+    curSymbolArr[x] = {... elements["·"]};
 };
 
 const getSouth = (i: number) => {
@@ -396,6 +434,11 @@ const randomBetweenTwo = (a: number | false, b: number | false) => {
     } else {
         return false;
     }
+};
+
+const randomIntFromInterval = (min: number, max: number) => {
+    // min and max included
+    return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
 //DEBUG
