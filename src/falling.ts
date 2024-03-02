@@ -17,7 +17,7 @@ let fontSize: number = 16;
 const randomArrAmount = 100;
 let randomArrNum = 0;
 
-export let framerate = 1000 / 24;
+export let framerate = 1000 / 60;
 var timer: number | undefined = undefined;
 
 var charSelect = document.getElementById("char") as HTMLInputElement;
@@ -88,11 +88,22 @@ const reset = () => {
 
 //INPUT FUNCTIONS
 
-export const handleKey = (e: KeyboardEvent) => {
-    if ((e as KeyboardEvent).key === "ArrowRight") {
+function debounce(func: (...args: any[]) => void, timeout = 300): (...args: any[]) => void {
+    let timer: ReturnType<typeof setTimeout>;
+    return (...args: any[]) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            func( args);
+        }, timeout);
+    };
+}
+
+// Your original handleKey function, modified to include debouncing
+export const handleKey = debounce((e: KeyboardEvent) => {
+    if (e.key === "ArrowRight") {
         sim();
     }
-};
+});
 
 const clickDetect = (main: HTMLElement) => {
     main.addEventListener("mousedown", (e: MouseEvent) => {
@@ -256,12 +267,19 @@ const iterateOver = () => {
 };
 
 const doEffects = (x: number) => {
+    //Need to re write, if elment changed, or x changes causes issues
     let moved = false;
     const el = curSymbolArr[x];
-    if (el.acidic) acid(x, el);
+
+    //Actions
+    if (el.acidic) acid(x);
+    if (el.bug) doBugSexOrDie(x, el);
+
+    //Movements
     if (el.graved) moved = gravity(x, el);
+    if (el.chaotic && !moved) moved = chaosMovement(x);
     if (el.liquidy && !moved) moved = slide(x, el);
-    if (el.halfLife) decay(x, el);
+    // if (el.halfLife) decay(x, el);
     if (!moved) casePass(x);
 };
 
@@ -316,22 +334,90 @@ const gravity = (x: number, el: element) => {
     return false;
 };
 
-const decay = (x: number, el: element) => {
-    // For for when we have all elements
-    // const alphabet = 'abcdefghijklmnopqrstuvwxyz'
-    // const max = alphabet.indexOf(el.symbol.toLowerCase())
-    // const firstelement = randomIntFromInterval(0,max || alphabet.length)
-    // console.log(firstelement)
+// const decay = (x: number, el: element) => {
+//     // For for when we have all elements
+//     // const alphabet = 'abcdefghijklmnopqrstuvwxyz'
+//     // const max = alphabet.indexOf(el.symbol.toLowerCase())
+//     // const firstelement = randomIntFromInterval(0,max || alphabet.length)
+//     // console.log(firstelement)
+// };
+
+const chaosMovement = (x: number) => {
+    const possibleDirections = [getNorth(x), getNorthEast(x), getEast(x), getSouthEast(x), getSouth(x), getSouthWest(x), getWest(x), getNorthWest(x)];
+
+    const validDirections = possibleDirections.filter((index) => {
+        if (typeof index === "number" && curSymbolArr[index].density < 5) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    if (validDirections.length < 1) {
+        return false;
+    }
+
+    const chosenDirection = validDirections[randomIntFromInterval(0, validDirections.length - 1)];
+    swap(x, chosenDirection);
+
+    return true;
 };
 
-const acid = (x: number, el: element) => {
+const doBugSexOrDie = (x: number, el: element) => {
+    const possibleDirections = [getNorth(x), getNorthEast(x), getEast(x), getSouthEast(x), getSouth(x), getSouthWest(x), getWest(x), getNorthWest(x)];
+
+    const bugs = possibleDirections.filter((index) => {
+        if (typeof index === "number" && curSymbolArr[index].bug) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    const numOfBugs: number = bugs.length;
+    let halfLife = el.halfLife;
+
+    console.log(numOfBugs);
+
+    if (numOfBugs > 0 && numOfBugs < 3) {
+        if (randomNumCheck(0.1)) {
+            const validDirections = possibleDirections.filter((index) => {
+                if (typeof index === "number" && curSymbolArr[index].density === 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }) as number[];
+
+            if (validDirections.length < 1) {
+                return false;
+            }
+
+            const chosenDirection = validDirections[randomIntFromInterval(0, validDirections.length - 1)];
+            curSymbolArr[chosenDirection] = {... elements["b"]};
+            return true;
+        }
+    } else if( numOfBugs > 4){
+        halfLife = halfLife * 2
+    } else if(numOfBugs == 0){
+        return false
+    }
+    curSymbolArr[x].life = curSymbolArr[x].life - el.halfLife;
+    if (curSymbolArr[x].life < 0) {
+        destroy(x)
+    }
+
+    return false;
+};
+
+const acid = (x: number) => {
     const directBelowIndex = southArr[x];
     if (directBelowIndex) {
         const directBelow = curSymbolArr[directBelowIndex];
         if (!directBelow.nonDestructable) {
             destroy(x);
-            destroy(directBelowIndex)
-            return true
+            destroy(directBelowIndex);
+            return true;
         }
     }
     const dancePartnerWestIndex = westArr[x];
@@ -342,7 +428,7 @@ const acid = (x: number, el: element) => {
 
     if (chosenDancePartner) {
         destroy(x);
-        destroy(chosenDancePartner)
+        destroy(chosenDancePartner);
         return true;
     }
     return false;
@@ -362,7 +448,39 @@ const swap = (a: number, b: number) => {
 };
 
 const destroy = (x: number) => {
-    curSymbolArr[x] = {... elements["·"]};
+    curSymbolArr[x] = { ...elements["·"] };
+};
+
+const getNorth = (i: number) => {
+    let result = i - dimensions.columns;
+    if (result < 0) {
+        return false;
+    }
+    return result;
+};
+
+const getNorthEast = (i: number) => {
+    let result = i - dimensions.columns + 1;
+    if ((i % dimensions.columns) + 1 >= dimensions.columns || result < 0) {
+        return false;
+    }
+    return result;
+};
+
+const getEast = (i: number) => {
+    let result = i + 1;
+    if ((i % dimensions.columns) + 1 >= dimensions.columns || result >= dimensions.total) {
+        return false;
+    }
+    return result;
+};
+
+const getSouthEast = (i: number) => {
+    let result = i + dimensions.columns + 1;
+    if ((i % dimensions.columns) + 1 >= dimensions.columns || result >= dimensions.total) {
+        return false;
+    }
+    return result;
 };
 
 const getSouth = (i: number) => {
@@ -381,25 +499,17 @@ const getSouthWest = (i: number) => {
     return result;
 };
 
-const getSouthEast = (i: number) => {
-    let result = i + dimensions.columns + 1;
-    if ((i % dimensions.columns) + 1 >= dimensions.columns || result >= dimensions.total) {
-        return false;
-    }
-    return result;
-};
-
-const getEast = (i: number) => {
-    let result = i + 1;
-    if ((i % dimensions.columns) + 1 >= dimensions.columns || result >= dimensions.total) {
-        return false;
-    }
-    return result;
-};
-
 const getWest = (i: number) => {
     let result = i - 1;
     if ((i % dimensions.columns) - 1 < 0 || result <= 0) {
+        return false;
+    }
+    return result;
+};
+
+const getNorthWest = (i: number) => {
+    let result = i - dimensions.columns - 1;
+    if ((i % dimensions.columns) - 1 < 0 || result < 0) {
         return false;
     }
     return result;

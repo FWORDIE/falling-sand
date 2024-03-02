@@ -9,6 +9,8 @@ export let elements: { [key: string]: element } = {
         friction: 0.1,
         velocity: 0,
         nonDestructable: true,
+        halfLife:1,
+        life: 1,
     },
     a: {
         symbol: "a",
@@ -23,6 +25,23 @@ export let elements: { [key: string]: element } = {
         horizontalVelocity: 0,
         nonDestructable: true,
         acidic:true,
+        halfLife:1,
+        life: 1,
+    },
+    b:{
+        symbol: "b",
+        name:'bug',
+        graved:false,
+        chaotic:true,
+        bug:true,
+        density: 0,
+        acc: 0,
+        max: 8,
+        friction: 0.1,
+        velocity: 0,
+        halfLife:0.1,
+        life: 1,
+
     },
     r: {
         symbol: "r",
@@ -34,6 +53,8 @@ export let elements: { [key: string]: element } = {
         friction: 0.1,
         velocity: 0,
         nonslide:true,
+        halfLife:1,
+        life: 1,
     },
     s: {
         symbol: "s",
@@ -44,6 +65,8 @@ export let elements: { [key: string]: element } = {
         density: 99,
         friction: 0.5,
         velocity: 0,
+        halfLife:1,
+        life: 1,
     },
     u: {
         symbol: "u",
@@ -56,6 +79,7 @@ export let elements: { [key: string]: element } = {
         halfLife:0.5,
         velocity: 0,
         nonslide:true,
+        life: 1
     },
     w: {
         symbol: "w",
@@ -67,8 +91,11 @@ export let elements: { [key: string]: element } = {
         max: 8,
         friction: 0.1,
         velocity: 0,
-        horizontalVelocity: 0
+        horizontalVelocity: 0,
+        halfLife:1,
+        life: 1
     },
+
 
 
 };
@@ -85,7 +112,10 @@ export type element = {
     liquidy?: boolean;
     nonslide?:boolean;
     horizontalVelocity?: number;
-    halfLife?:number;
+    halfLife:number;
     nonDestructable?:boolean;
     acidic?:boolean;
+    chaotic?:boolean;
+    bug?:boolean;
+    life:number;
 };
