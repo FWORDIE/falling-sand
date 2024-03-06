@@ -59,7 +59,7 @@ export const addElement = (key: string, elementConfig: Partial<element>) => {
 
 addElement("·", {
     symbol: "·",
-    name: "Air",
+    name: "null",
     graved: false,
     density: 10,
     acc: 0,
@@ -70,17 +70,17 @@ addElement("·", {
 
 addElement('a',{
     symbol: "a",
-    name: "Acid",
-    liquidy: true,
-    density: 15,
-    friction: 0.1,
-    acidSafe: true,
-    acidic:true
+    name: "Ash",
+    acc: 0.1,
+    max: 4,
+    density: 40,
+    friction: 0.9,
 })
+
 
 addElement('b',{
     symbol: "b",
-    name:'bug',
+    name:'Bug',
     graved:false,
     chaotic:true,
     bug:true,
@@ -92,7 +92,7 @@ addElement('b',{
 
 addElement('c',{
     symbol: "c",
-    name: "cloud",
+    name: "Cloud",
     acc: -0.3,
     max: -2,
     density: 5,
@@ -124,9 +124,19 @@ addElement('g',{
     static:true
 })
 
+addElement('h',{
+    symbol: "h",
+    name: "Hydrochloric",
+    liquidy: true,
+    density: 15,
+    friction: 0.1,
+    acidSafe: true,
+    acidic:true
+})
+
 addElement('m',{
     symbol: "m",
-    name: "methane",
+    name: "Methane",
     acc: -0.5,
     max: -3,
     density: 5,
@@ -138,14 +148,7 @@ addElement('m',{
     flammable:true,
 })
 
-addElement('r',{
-    symbol: "r",
-    name: "Rock",
-    density: 90,
-    acc: 0.5,
-    max:10,
-    friction: 0.99
-})
+
 
 addElement('l',{
     symbol: "l",
@@ -169,6 +172,15 @@ addElement('o',{
     friction: 0.4,
     fuel:1,
     flammable:true
+})
+
+addElement('r',{
+    symbol: "r",
+    name: "Rock",
+    density: 90,
+    acc: 0.5,
+    max:10,
+    friction: 0.99
 })
 
 addElement('s',{

@@ -451,7 +451,8 @@ const fire = (x: number, el: element) => {
     }
 
     if (curSymbolArr[x].life <= 0) {
-        curSymbolArr[x] = { ...elements["c"] };
+        
+        curSymbolArr[x] = randomNumCheck(0.55) ? { ...elements["c"] } : { ...elements["a"] };
         return true;
     }
 
