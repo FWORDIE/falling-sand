@@ -293,8 +293,8 @@ const iterateOver = () => {
 
 const doEffects = (x: number, pass: number, direction: boolean) => {
     const el = curSymbolArr[x];
-    if(el.symbol == "·"){
-        return true
+    if (el.symbol == "·") {
+        return true;
     }
     //Need to re write, if elment changed, or x changes causes issues
     let moved = false;
@@ -314,8 +314,7 @@ const doEffects = (x: number, pass: number, direction: boolean) => {
         if (el.graved) moved = gravity(x, el);
     } else {
         if (el.antiGraved) moved = antiGravity(x, el);
-        if (el.chaotic && !moved) moved = chaosMovement(x,el);
-
+        if (el.chaotic && !moved) moved = chaosMovement(x, el);
     }
 
     if (el.liquidy && !moved && pass !== -1) slid = slide(x, el, direction);
@@ -341,7 +340,8 @@ const slide = (x: number, el: element, direction: boolean) => {
     if (
         typeof dancePartner != "number" ||
         (!el.antiGraved && curSymbolArr[dancePartner].density >= el.density) ||
-        (el.antiGraved && curSymbolArr[dancePartner].density <= el.density) || !curSymbolArr[dancePartner].liquidy 
+        (el.antiGraved && curSymbolArr[dancePartner].density <= el.density) ||
+        !curSymbolArr[dancePartner].liquidy
     ) {
         curSymbolArr[x].horizontalVelocity = curSymbolArr[x].horizontalVelocity + Math.sign(vol) * 0.5 * -1;
         return false;
@@ -375,9 +375,13 @@ const gravity = (x: number, el: element) => {
             const dancePartnerIndexSouthWest = southWestArr[x];
             const dancePartnerIndexsouthEast = southEastArr[x];
             const dancePartnerIndexsouthWestMatch =
-                dancePartnerIndexSouthWest && curSymbolArr[dancePartnerIndexSouthWest].density < el.density && !curSymbolArr[dancePartnerIndexSouthWest].static ? dancePartnerIndexSouthWest : false;
+                dancePartnerIndexSouthWest && curSymbolArr[dancePartnerIndexSouthWest].density < el.density && !curSymbolArr[dancePartnerIndexSouthWest].static
+                    ? dancePartnerIndexSouthWest
+                    : false;
             const dancePartnerIndexsouthEastMatch =
-                dancePartnerIndexsouthEast && curSymbolArr[dancePartnerIndexsouthEast].density < el.density && !curSymbolArr[dancePartnerIndexsouthEast].static ? dancePartnerIndexsouthEast : false;
+                dancePartnerIndexsouthEast && curSymbolArr[dancePartnerIndexsouthEast].density < el.density && !curSymbolArr[dancePartnerIndexsouthEast].static
+                    ? dancePartnerIndexsouthEast
+                    : false;
 
             const chosenDancePartner = randomBetweenTwo(dancePartnerIndexsouthEastMatch, dancePartnerIndexsouthWestMatch);
 
@@ -388,7 +392,7 @@ const gravity = (x: number, el: element) => {
         }
     }
     curSymbolArr[x].velocity = 0;
-    curSymbolArr[x].symbol = curSymbolArr[x].symbol.toUpperCase()
+    curSymbolArr[x].symbol = curSymbolArr[x].symbol.toUpperCase();
     return false;
 };
 
@@ -405,7 +409,7 @@ const antiGravity = (x: number, el: element) => {
             }
             for (let dis = Math.floor(curSymbolArr[x].velocity); dis <= 0; dis++) {
                 const dancePartnerIndex = northArr[x + dimensions.columns * dis];
-                if (dancePartnerIndex && curSymbolArr[dancePartnerIndex].density > el.density && curSymbolArr[dancePartnerIndex].liquidy ) {
+                if (dancePartnerIndex && curSymbolArr[dancePartnerIndex].density > el.density && curSymbolArr[dancePartnerIndex].liquidy) {
                     swap(x, dancePartnerIndex);
                     return true;
                 }
@@ -414,11 +418,15 @@ const antiGravity = (x: number, el: element) => {
             const dancePartnerIndexNorthWest = northWestArr[x];
             const dancePartnerIndexNorthEast = northEastArr[x];
             const dancePartnerIndexNorthWestMatch =
-                typeof dancePartnerIndexNorthWest === "number" && curSymbolArr[dancePartnerIndexNorthWest].density > el.density && curSymbolArr[dancePartnerIndexNorthWest].liquidy 
+                typeof dancePartnerIndexNorthWest === "number" &&
+                curSymbolArr[dancePartnerIndexNorthWest].density > el.density &&
+                curSymbolArr[dancePartnerIndexNorthWest].liquidy
                     ? dancePartnerIndexNorthWest
                     : false;
             const dancePartnerIndexNorthEastMatch =
-                typeof dancePartnerIndexNorthEast === "number" && curSymbolArr[dancePartnerIndexNorthEast].density > el.density && curSymbolArr[dancePartnerIndexNorthEast].liquidy 
+                typeof dancePartnerIndexNorthEast === "number" &&
+                curSymbolArr[dancePartnerIndexNorthEast].density > el.density &&
+                curSymbolArr[dancePartnerIndexNorthEast].liquidy
                     ? dancePartnerIndexNorthEast
                     : false;
 
@@ -430,7 +438,7 @@ const antiGravity = (x: number, el: element) => {
             }
         }
     }
-    curSymbolArr[x].symbol = curSymbolArr[x].symbol.toUpperCase()
+    curSymbolArr[x].symbol = curSymbolArr[x].symbol.toUpperCase();
     curSymbolArr[x].velocity = 0;
     return false;
 };
@@ -447,31 +455,38 @@ const fire = (x: number, el: element) => {
         return true;
     }
 
-    if (el.life < 1) {
-        const possibleDirections = [northArr[x], northEastArr[x], eastArr[x], southEastArr[x], southArr[x], southWestArr[x], westArr[x], northWestArr[x]];
-        const validDirections = possibleDirections.filter((index) => {
-            if (typeof index === "number" && curSymbolArr[index].flammable) {
-
-                return true;
-            } else {
-
-                return false;
-            }
-        }) as number[];
-
-        if (validDirections.length < 1) {
-
+    const possibleDirections = [northArr[x], northEastArr[x], eastArr[x], southEastArr[x], southArr[x], southWestArr[x], westArr[x], northWestArr[x]];
+    const validDirections = possibleDirections.filter((index) => {
+        if (typeof index === "number" && curSymbolArr[index].flammable) {
             return true;
+        } else {
+            return false;
         }
+    }) as number[];
 
-        const chosenDirection = validDirections[randomIntFromInterval(0, validDirections.length - 1)];
-
-        if (randomNumCheck(1/(curSymbolArr[chosenDirection].fuel/2))) {
-            let fuel = curSymbolArr[chosenDirection].fuel
-            curSymbolArr[chosenDirection] = { ...elements["f"] };
-            curSymbolArr[chosenDirection].life = fuel
+    const Water = possibleDirections.filter((index) => {
+        if (typeof index === "number" && curSymbolArr[index].symbol.toLowerCase() === "w") {
+            return true;
+        } else {
+            return false;
         }
+    }) as number[];
+
+    if (Water.length > 0) {
+        curSymbolArr[x] = { ...elements["s"] };
     }
+    if (validDirections.length < 1) {
+        return true;
+    }
+
+    const chosenDirection = validDirections[randomIntFromInterval(0, validDirections.length - 1)];
+
+    if (randomNumCheck(1 / (curSymbolArr[chosenDirection].fuel / 2))) {
+        let fuel = curSymbolArr[chosenDirection].fuel;
+        curSymbolArr[chosenDirection] = { ...elements["f"] };
+        curSymbolArr[chosenDirection].life = fuel;
+    }
+
     return true;
 };
 
@@ -483,7 +498,7 @@ const fire = (x: number, el: element) => {
 //     // console.log(firstelement)
 // };
 
-const chaosMovement = (x: number,el:element) => {
+const chaosMovement = (x: number, el: element) => {
     const possibleDirections = [northArr[x], northEastArr[x], eastArr[x], southEastArr[x], southArr[x], southWestArr[x], westArr[x], northWestArr[x]];
     const validDirections = possibleDirections.filter((index) => {
         if (typeof index === "number" && curSymbolArr[index].density < el.density) {
@@ -538,7 +553,7 @@ const doBugSexOrDie = (x: number, el: element) => {
             return true;
         }
     } else if (numOfBugs > 4) {
-        curSymbolArr[x].life  = curSymbolArr[x].life - el.halfLife;
+        curSymbolArr[x].life = curSymbolArr[x].life - el.halfLife;
     } else if (numOfBugs == 0) {
         return false;
     }
@@ -691,9 +706,10 @@ const randomIntFromInterval = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
-const invertCase = (x:number) => {
-    curSymbolArr[x].symbol = curSymbolArr[x].symbol === curSymbolArr[x].symbol.toUpperCase() ? curSymbolArr[x].symbol.toLowerCase() : curSymbolArr[x].symbol.toUpperCase()
-}
+const invertCase = (x: number) => {
+    curSymbolArr[x].symbol =
+        curSymbolArr[x].symbol === curSymbolArr[x].symbol.toUpperCase() ? curSymbolArr[x].symbol.toLowerCase() : curSymbolArr[x].symbol.toUpperCase();
+};
 
 //DEBUG
 

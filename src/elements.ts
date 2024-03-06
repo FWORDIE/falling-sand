@@ -105,7 +105,7 @@ addElement('c',{
 addElement('f',{
     symbol:'f',
     name:'Fire',
-    density:3,
+    density:99,
     friction:0.5,
     graved:false,
     life:1,
@@ -157,6 +157,18 @@ addElement('l',{
     fuel:10,
     flammable:true,
     nonslide:true,
+})
+
+addElement('o',{
+    symbol: "o",
+    name: "Oil",
+    liquidy:true,
+    density: 15,
+    acc: 0.2,
+    max:8,
+    friction: 0.4,
+    fuel:1,
+    flammable:true
 })
 
 addElement('s',{
