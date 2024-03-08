@@ -239,11 +239,6 @@ const createSymbolArray = () => {
 };
 
 const createDirectionArrays = () => {
-    southArr = [];
-    southEastArr = [];
-    southWestArr = [];
-    westArr = [];
-    eastArr = [];
     for (let i = 0; i < dimensions.total; i++) {
         northArr[i] = getNorth(i);
         northEastArr[i] = getNorthEast(i);
@@ -387,15 +382,25 @@ const gravity = (x: number, el: element) => {
                         }
                     }
                     //check left and right
-                    const neighbourWest = westArr[x]
-                    const neighbourEast = eastArr[x]
-                    if(neighbourWest && curSymbolArr[neighbourWest].graved &&curSymbolArr[neighbourWest].velocity == 0 && randomNumCheck(1-curSymbolArr[neighbourWest].friction)){
+                    const neighbourWest = westArr[x];
+                    const neighbourEast = eastArr[x];
+                    if (
+                        neighbourWest &&
+                        curSymbolArr[neighbourWest].graved &&
+                        curSymbolArr[neighbourWest].velocity == 0 &&
+                        randomNumCheck(1 - curSymbolArr[neighbourWest].friction)
+                    ) {
                         curSymbolArr[neighbourWest].velocity = 2;
-                        curSymbolArr[neighbourWest].horizontalVelocity = -10
+                        curSymbolArr[neighbourWest].horizontalVelocity = -10;
                     }
-                    if(neighbourEast && curSymbolArr[neighbourEast].graved &&curSymbolArr[neighbourEast].velocity == 0 && randomNumCheck(1- curSymbolArr[neighbourEast].friction)){
+                    if (
+                        neighbourEast &&
+                        curSymbolArr[neighbourEast].graved &&
+                        curSymbolArr[neighbourEast].velocity == 0 &&
+                        randomNumCheck(1 - curSymbolArr[neighbourEast].friction)
+                    ) {
                         curSymbolArr[neighbourEast].velocity = 2;
-                        curSymbolArr[neighbourEast].horizontalVelocity = 10
+                        curSymbolArr[neighbourEast].horizontalVelocity = 10;
                     }
 
                     swap(x, dancePartnerIndex);
@@ -453,6 +458,28 @@ const antiGravity = (x: number, el: element) => {
                         }
                     } else {
                         console.log("boo", curSymbolArr[x].velocity, curSymbolArr[northArr[dancePartnerIndex]].symbol);
+                    }
+
+                    //check left and right
+                    const neighbourWest = westArr[x];
+                    const neighbourEast = eastArr[x];
+                    if (
+                        neighbourWest &&
+                        curSymbolArr[neighbourWest].graved &&
+                        curSymbolArr[neighbourWest].velocity == 0 &&
+                        randomNumCheck(1 - curSymbolArr[neighbourWest].friction)
+                    ) {
+                        curSymbolArr[neighbourWest].velocity = -2;
+                        curSymbolArr[neighbourWest].horizontalVelocity = -10;
+                    }
+                    if (
+                        neighbourEast &&
+                        curSymbolArr[neighbourEast].graved &&
+                        curSymbolArr[neighbourEast].velocity == 0 &&
+                        randomNumCheck(1 - curSymbolArr[neighbourEast].friction)
+                    ) {
+                        curSymbolArr[neighbourEast].velocity = -2;
+                        curSymbolArr[neighbourEast].horizontalVelocity = 10;
                     }
                     swap(x, dancePartnerIndex);
                     return true;
@@ -575,7 +602,6 @@ const doBugSexOrDie = (x: number, el: element) => {
 
     const numOfBugs: number = bugs.length;
     // let halfLife = el.halfLife;
-
 
     if (numOfBugs > 0 && numOfBugs < 3) {
         if (randomNumCheck(0.5)) {

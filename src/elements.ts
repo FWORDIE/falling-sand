@@ -14,17 +14,17 @@ export type element = {
     nonslide: boolean;
     horizontalVelocity: number;
     halfLife: number;
-    fuel:number;
+    fuel: number;
     acidSafe: boolean;
     acidic: boolean;
     chaotic: boolean;
     bug: boolean;
     life: number;
-    antiGraved:boolean;
-    burn:boolean;
-    flammable:boolean;
-    static:boolean;
-    null:boolean
+    antiGraved: boolean;
+    burn: boolean;
+    flammable: boolean;
+    static: boolean;
+    null: boolean;
 };
 
 const DEFAULTS: Partial<element> = {
@@ -35,10 +35,10 @@ const DEFAULTS: Partial<element> = {
     acidic: false,
     chaotic: false,
     bug: false,
-    antiGraved:false,
-    burn:false,
-    flammable:false,
-    static:false,
+    antiGraved: false,
+    burn: false,
+    flammable: false,
+    static: false,
     life: 1,
     halfLife: 0.1,
     horizontalVelocity: 0,
@@ -47,9 +47,9 @@ const DEFAULTS: Partial<element> = {
     max: 8,
     density: 50,
     friction: 0.5,
-    fuel:1,
-    null:false,
-    horizontalMax: 2
+    fuel: 1,
+    null: false,
+    horizontalMax: 2,
 };
 
 export const addElement = (key: string, elementConfig: Partial<element>) => {
@@ -61,14 +61,14 @@ export const addElement = (key: string, elementConfig: Partial<element>) => {
     elements[key] = configWithDefaults;
 };
 
-addElement('s',{
+addElement("s", {
     symbol: "s",
     name: "Sand",
     acc: 0.3,
     max: 8,
     density: 80,
-    friction: 0.1,
-})
+    friction: 0.2,
+});
 
 addElement("·", {
     symbol: "·",
@@ -79,32 +79,32 @@ addElement("·", {
     friction: 0.1,
     acidSafe: true,
     liquidy: true,
-    null:true
+    null: true,
 });
 
-addElement('a',{
+addElement("a", {
     symbol: "a",
     name: "Ash",
     acc: 0.1,
     max: 4,
     density: 40,
     friction: 0.01,
-})
+    horizontalMax:4,
+});
 
-
-addElement('b',{
+addElement("b", {
     symbol: "b",
-    name:'Bug',
-    graved:false,
-    chaotic:true,
-    bug:true,
+    name: "Bug",
+    graved: false,
+    chaotic: true,
+    bug: true,
     density: 20,
-    halfLife:0.1,
+    halfLife: 0.1,
     life: 1,
-    flammable:true
-})
+    flammable: true,
+});
 
-addElement('c',{
+addElement("c", {
     symbol: "c",
     name: "Cloud",
     acc: -0.3,
@@ -112,112 +112,116 @@ addElement('c',{
     horizontalMax: 2,
     density: 5,
     friction: 0,
-    antiGraved:true,
-    graved:false,
-    liquidy:true
-})
+    antiGraved: true,
+    graved: false,
+    liquidy: true,
+});
 
-addElement('f',{
-    symbol:'f',
-    name:'Fire',
-    density:99,
-    friction:0.5,
-    graved:false,
-    life:1,
-    halfLife:0.05,
-    burn:true
-})
+addElement("f", {
+    symbol: "f",
+    name: "Fire",
+    density: 99,
+    friction: 0.5,
+    graved: false,
+    life: 1,
+    halfLife: 0.05,
+    burn: true,
+});
 
-addElement('g',{
-    symbol:'g',
-    name:'Gravium',
-    density:99,
-    friction:0.5,
-    graved:false,
-    life:1,
-    halfLife:0.05,
-    static:true
-})
+addElement("g", {
+    symbol: "g",
+    name: "Gravium",
+    acc: -1,
+    max: -8,
+    density: 0,
+    friction: 0.5,
+    antiGraved: true,
+    graved: false,
+    life: 1,
+    halfLife: 0.05,
+});
 
-addElement('h',{
+addElement("h", {
     symbol: "h",
     name: "Hydrochloric",
     liquidy: true,
     density: 15,
     friction: 0.1,
     acidSafe: true,
-    acidic:true
-})
+    acidic: true,
+});
 
-addElement('m',{
+addElement("m", {
     symbol: "m",
     name: "Methane",
     acc: -0.5,
     max: -3,
     density: 5,
     friction: 0.1,
-    fuel:1,
-    antiGraved:true,
-    graved:false,
-    liquidy:true,
-    flammable:true,
-})
+    fuel: 1,
+    antiGraved: true,
+    graved: false,
+    liquidy: true,
+    flammable: true,
+});
 
-
-
-addElement('l',{
+addElement("l", {
     symbol: "l",
     name: "Logs",
     density: 70,
     acc: 0.4,
-    max:8,
+    max: 8,
     friction: 0.99,
-    fuel:10,
-    flammable:true,
-    nonslide:true,
-})
+    fuel: 10,
+    flammable: true,
+    nonslide: true,
+    static:true,
+    graved:false
+});
 
-addElement('o',{
+addElement("o", {
     symbol: "o",
     name: "Oil",
-    liquidy:true,
+    liquidy: true,
     density: 15,
     acc: 0.2,
-    max:8,
+    max: 8,
     friction: 0,
-    fuel:1,
-    horizontalMax:2,
+    fuel: 1,
+    horizontalMax: 2,
 
-    flammable:true
-})
+    flammable: true,
+});
 
-addElement('r',{
+addElement("r", {
     symbol: "r",
     name: "Rock",
     density: 90,
     acc: 0.5,
-    max:10,
-    friction: 0.99
-})
+    max: 10,
+    friction: 0.99,
+    static:true,
+    graved:false
+});
 
-
-
-addElement('u',{
+addElement("u", {
     symbol: "u",
     name: "uranium",
     density: 99,
     acc: 1,
-    max:10,
-    friction: 0.1
-})
+    max: 10,
+    friction: 0.1,
+    static:true,
+    graved:false
+});
 
-addElement('w',{
+addElement("w", {
     symbol: "w",
     name: "Water",
-    liquidy:true,
+    liquidy: true,
     density: 20,
     acc: 0.3,
-    max:8,
+    max: 8,
     friction: 0,
-    horizontalMax:4
-})
+    horizontalMax: 4,
+});
