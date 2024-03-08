@@ -9,6 +9,7 @@ export type element = {
     max: number;
     friction: number;
     velocity: number;
+    horizontalMax: number;
     liquidy: boolean;
     nonslide: boolean;
     horizontalVelocity: number;
@@ -22,7 +23,8 @@ export type element = {
     antiGraved:boolean;
     burn:boolean;
     flammable:boolean;
-    static:boolean
+    static:boolean;
+    null:boolean
 };
 
 const DEFAULTS: Partial<element> = {
@@ -45,7 +47,9 @@ const DEFAULTS: Partial<element> = {
     max: 8,
     density: 50,
     friction: 0.5,
-    fuel:1
+    fuel:1,
+    null:false,
+    horizontalMax: 2
 };
 
 export const addElement = (key: string, elementConfig: Partial<element>) => {
@@ -57,6 +61,15 @@ export const addElement = (key: string, elementConfig: Partial<element>) => {
     elements[key] = configWithDefaults;
 };
 
+addElement('s',{
+    symbol: "s",
+    name: "Sand",
+    acc: 0.3,
+    max: 8,
+    density: 80,
+    friction: 0.1,
+})
+
 addElement("·", {
     symbol: "·",
     name: "null",
@@ -65,7 +78,8 @@ addElement("·", {
     acc: 0,
     friction: 0.1,
     acidSafe: true,
-    liquidy: true
+    liquidy: true,
+    null:true
 });
 
 addElement('a',{
@@ -74,7 +88,7 @@ addElement('a',{
     acc: 0.1,
     max: 4,
     density: 40,
-    friction: 0.9,
+    friction: 0.01,
 })
 
 
@@ -95,8 +109,9 @@ addElement('c',{
     name: "Cloud",
     acc: -0.3,
     max: -2,
+    horizontalMax: 2,
     density: 5,
-    friction: 0.1,
+    friction: 0,
     antiGraved:true,
     graved:false,
     liquidy:true
@@ -169,8 +184,10 @@ addElement('o',{
     density: 15,
     acc: 0.2,
     max:8,
-    friction: 0.4,
+    friction: 0,
     fuel:1,
+    horizontalMax:2,
+
     flammable:true
 })
 
@@ -181,15 +198,6 @@ addElement('r',{
     acc: 0.5,
     max:10,
     friction: 0.99
-})
-
-addElement('s',{
-    symbol: "s",
-    name: "Sand",
-    acc: 0.3,
-    max: 8,
-    density: 80,
-    friction: 0.5,
 })
 
 
@@ -210,5 +218,6 @@ addElement('w',{
     density: 20,
     acc: 0.3,
     max:8,
-    friction: 0.1
+    friction: 0,
+    horizontalMax:4
 })
