@@ -264,6 +264,32 @@ const addMenuOptions = () => {
         opt.innerHTML = elements[key].name;
         select.appendChild(opt);
     }
+
+    const saveButton = document.createElement("button");
+    saveButton.innerHTML = "save";
+    saveButton.addEventListener("click", () => {
+        save();
+    });
+    document.getElementById("loadSave")?.append(saveButton);
+
+    const loadButton = document.createElement("button");
+    loadButton.innerHTML = "load";
+    loadButton.addEventListener("click", () => {
+        load();
+    });
+    document.getElementById("loadSave")?.append(loadButton);
+};
+
+const save = () => {
+    console.log(JSON.stringify(curSymbolArr).length);
+    localStorage.setItem("state", JSON.stringify(curSymbolArr));
+};
+
+const load = () => {
+    const state = localStorage.getItem("state");
+    if (state) {
+        curSymbolArr = JSON.parse(state);
+    }
 };
 
 // EFFECTRS
@@ -310,6 +336,7 @@ const doEffects = (x: number, pass: number, direction: boolean) => {
         if (el.graved) moved = gravity(x, el);
     } else {
         if (el.antiGraved) moved = antiGravity(x, el);
+        if (el.grow) moved = grow(x, el);
         if (el.chaotic && !moved) moved = chaosMovement(x, el);
     }
 
@@ -456,10 +483,7 @@ const antiGravity = (x: number, el: element) => {
                         if (curSymbolArr[x].horizontalVelocity < 1 && curSymbolArr[x].horizontalVelocity > -1 && el.liquidy) {
                             curSymbolArr[x].horizontalVelocity = 1;
                         }
-                    } else {
-                        console.log("boo", curSymbolArr[x].velocity, curSymbolArr[northArr[dancePartnerIndex]].symbol);
                     }
-
                     //check left and right
                     const neighbourWest = westArr[x];
                     const neighbourEast = eastArr[x];
@@ -559,6 +583,83 @@ const fire = (x: number, el: element) => {
     }
 
     return true;
+};
+
+const grow = (x: number, el: element) => {
+    const possibleDirections = [northArr[x], northEastArr[x], eastArr[x], southEastArr[x], southArr[x], southWestArr[x], westArr[x], northWestArr[x]];
+    const water = possibleDirections.filter((index) => {
+        if (typeof index === "number" && curSymbolArr[index].symbol.toLowerCase() == 'w') {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    if(water.length > 0 && !el.growing){
+        const dancePartner = water[randomIntFromInterval(0, water.length)];
+        curSymbolArr[dancePartner] = {... elements['·']}
+        curSymbolArr[x].growing = true
+
+    }
+
+    if (el.velocity > 0 || !curSymbolArr[x].growing) {
+        return false;
+    }
+
+    if (el.growth > 7 && randomNumCheck(0.5)) {
+        bloom(x);
+        return false;
+    }
+
+
+    const growthGiver = possibleDirections.filter((index) => {
+        if (typeof index === "number" && curSymbolArr[index].growGiver) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    const numOfGrowthGivers: number = growthGiver.length;
+
+    if (numOfGrowthGivers < 1 || !randomNumCheck(0.5) || numOfGrowthGivers > 5) {
+        return false;
+    }
+    const possibleGrowDirections = [northArr[x], northEastArr[x], northWestArr[x]].filter((index) => {
+        if (typeof index === "number" && (curSymbolArr[index].growGiver || curSymbolArr[index].null) && (!curSymbolArr[index].grow || randomNumCheck())) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    if (possibleGrowDirections.length > 2) {
+        const dancePartner = possibleGrowDirections[randomIntFromInterval(0, possibleGrowDirections.length)];
+        curSymbolArr[dancePartner] = { ...el };
+        curSymbolArr[dancePartner].growth = el.growth + 1;
+        curSymbolArr[dancePartner].static = true;
+        curSymbolArr[dancePartner].graved = false;
+        curSymbolArr[x].growing = false;
+        return true;
+    }
+
+    return false;
+};
+
+const bloom = (x: number) => {
+    const possibleDirections = [northArr[x], eastArr[x], southArr[x], westArr[x]];
+
+    const growthGiver = possibleDirections.filter((index) => {
+        if (typeof index === "number" && (curSymbolArr[index].growGiver || curSymbolArr[index].null)) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    for (let i = 0; i < growthGiver.length; i++) {
+        curSymbolArr[growthGiver[i]] = { ...elements["p"] };
+    }
 };
 
 // const decay = (x: number, el: element) => {

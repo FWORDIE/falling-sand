@@ -25,6 +25,10 @@ export type element = {
     flammable: boolean;
     static: boolean;
     null: boolean;
+    grow:boolean;
+    growth:number;
+    growGiver:boolean;
+    growing:boolean;
 };
 
 const DEFAULTS: Partial<element> = {
@@ -50,6 +54,10 @@ const DEFAULTS: Partial<element> = {
     fuel: 1,
     null: false,
     horizontalMax: 2,
+    grow:false,
+    growth:0,
+    growGiver:false,
+    growing:false,
 };
 
 export const addElement = (key: string, elementConfig: Partial<element>) => {
@@ -61,6 +69,37 @@ export const addElement = (key: string, elementConfig: Partial<element>) => {
     elements[key] = configWithDefaults;
 };
 
+addElement("v", {
+    symbol: "v",
+    name: "Vine",
+    acc: 0.3,
+    max: 8,
+    velocity:0.1,
+    density: 20,
+    friction: 1,
+    horizontalMax:0,
+    grow:true,
+    growth:0,
+    growGiver:true,
+    flammable:true,
+    growing:true,
+});
+
+addElement("p", {
+    symbol: "p",
+    name: "Petal",
+    acc: 0.3,
+    max: 8,
+    velocity:0.1,
+    density: 20,
+    friction: 1,
+    horizontalMax:0,
+    growth:0,
+    static:true,
+    graved:false,
+    flammable:true
+});
+
 addElement("s", {
     symbol: "s",
     name: "Sand",
@@ -68,6 +107,7 @@ addElement("s", {
     max: 8,
     density: 80,
     friction: 0.2,
+    growGiver:true,
 });
 
 addElement("·", {
@@ -79,7 +119,7 @@ addElement("·", {
     friction: 0.1,
     acidSafe: true,
     liquidy: true,
-    null: true,
+    null: true
 });
 
 addElement("a", {
@@ -88,8 +128,10 @@ addElement("a", {
     acc: 0.1,
     max: 4,
     density: 40,
-    friction: 0.01,
-    horizontalMax:4,
+    friction: 0.1,
+    horizontalMax:3,
+    growGiver:true,
+
 });
 
 addElement("b", {
@@ -189,7 +231,6 @@ addElement("o", {
     friction: 0,
     fuel: 1,
     horizontalMax: 2,
-
     flammable: true,
 });
 
@@ -224,4 +265,5 @@ addElement("w", {
     max: 8,
     friction: 0,
     horizontalMax: 4,
+    growGiver:true,
 });
