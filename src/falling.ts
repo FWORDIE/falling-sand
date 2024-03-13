@@ -493,6 +493,7 @@ const gravity = (x: number, el: element) => {
     }
     curSymbolArr[x].velocity = 0;
     if (!el.burn) {
+        console.log(el.name)
         curSymbolArr[x].symbol = curSymbolArr[x].symbol.toUpperCase();
     }
     return false;
@@ -578,11 +579,11 @@ const antiGravity = (x: number, el: element) => {
 };
 
 const fire = (x: number, el: element) => {
-    if (randomNumCheck(0.5)) {
+    if (randomNumCheck(1 / (el.fuel * 2))) {
         curSymbolArr[x].life = curSymbolArr[x].life - el.halfLife;
     }
 
-    if ((curSymbolArr[x].symbol = curSymbolArr[x].symbol.toLowerCase())) {
+    if ((curSymbolArr[x].symbol == curSymbolArr[x].symbol.toLowerCase())) {
         curSymbolArr[x].symbol = el.symbol.toUpperCase();
     } else {
         curSymbolArr[x].symbol = el.symbol.toLowerCase();
