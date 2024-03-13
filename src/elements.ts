@@ -29,6 +29,8 @@ export type element = {
     growth:number;
     growGiver:boolean;
     growing:boolean;
+    desc:string;
+    egg:boolean;
 };
 
 const DEFAULTS: Partial<element> = {
@@ -58,6 +60,8 @@ const DEFAULTS: Partial<element> = {
     growth:0,
     growGiver:false,
     growing:false,
+    desc:'its nothing yet',
+    egg:false,
 };
 
 export const addElement = (key: string, elementConfig: Partial<element>) => {
@@ -68,6 +72,143 @@ export const addElement = (key: string, elementConfig: Partial<element>) => {
 
     elements[key] = configWithDefaults;
 };
+
+
+
+addElement("s", {
+    symbol: "s",
+    name: "Sand",
+    acc: 0.3,
+    max: 8,
+    density: 80,
+    friction: 0.2,
+    growGiver:true,
+    horizontalMax:2,
+    desc:"it falls n' heaps"
+
+});
+
+addElement("e", {
+    symbol: "e",
+    name: "Egg",
+    acc: 0.2,
+    max: 8,
+    density: 80,
+    friction: 0.2,
+    growGiver:true,
+    horizontalMax:0,
+    egg:true,
+    desc:"smashes into bug"
+});
+
+addElement("·", {
+    symbol: "·",
+    name: "remove",
+    graved: false,
+    density: 10,
+    acc: 0,
+    friction: 0.1,
+    acidSafe: true,
+    liquidy: true,
+    null: true,
+    desc:"the void"
+
+});
+
+addElement("a", {
+    symbol: "a",
+    name: "Ash",
+    acc: 0.1,
+    max: 2,
+    density: 40,
+    friction: 0.1,
+    horizontalMax:3,
+    growGiver:true,
+    desc:"it falls, heaps n' nurturers"
+});
+
+addElement("b", {
+    symbol: "b",
+    name: "Bug",
+    graved: false,
+    chaotic: true,
+    bug: true,
+    density: 20,
+    halfLife: 0.5,
+    life: 1,
+    flammable: true,
+    desc:"has bug sex or dies"
+
+});
+
+addElement("d", {
+    symbol: "d",
+    name: "dead Bug",
+    acc: 0.1,
+    max: 1,
+    density: 45,
+    friction: 0.3,
+    horizontalMax:2,
+    growGiver:true,
+    flammable: true,
+    desc:"dead"
+
+});
+
+addElement("c", {
+    symbol: "c",
+    name: "Cloud",
+    acc: -0.3,
+    max: -2,
+    horizontalMax: 2,
+    density: 5,
+    friction: 0,
+    antiGraved: true,
+    graved: false,
+    liquidy: true,
+    desc:"abstract gas"
+});
+
+addElement("f", {
+    symbol: "f",
+    name: "Fire",
+    density: 99,
+    friction: 0.5,
+    graved: false,
+    life: 1,
+    halfLife: 0.05,
+    burn: true,
+    desc:"hot"
+
+});
+
+addElement("g", {
+    symbol: "g",
+    name: "Gravium",
+    acc: -1,
+    max: -8,
+    density: 0,
+    friction: 0.2,
+    horizontalMax:2,
+    antiGraved: true,
+    graved: false,
+    life: 1,
+    halfLife: 0.05,
+    desc:"sand but funky"
+
+});
+
+addElement("h", {
+    symbol: "h",
+    name: "Hydrochloric",
+    liquidy: true,
+    density: 15,
+    friction: 0.1,
+    acidSafe: true,
+    acidic: true,
+    desc:"acid but 'a' was taken"
+
+});
 
 addElement("v", {
     symbol: "v",
@@ -83,6 +224,8 @@ addElement("v", {
     growGiver:true,
     flammable:true,
     growing:true,
+    desc:"grows when it can"
+
 });
 
 addElement("p", {
@@ -97,100 +240,9 @@ addElement("p", {
     growth:0,
     static:true,
     graved:false,
-    flammable:true
-});
+    flammable:true,
+    desc:"parts of a flower"
 
-addElement("s", {
-    symbol: "s",
-    name: "Sand",
-    acc: 0.3,
-    max: 8,
-    density: 80,
-    friction: 0.2,
-    growGiver:true,
-});
-
-addElement("·", {
-    symbol: "·",
-    name: "null",
-    graved: false,
-    density: 10,
-    acc: 0,
-    friction: 0.1,
-    acidSafe: true,
-    liquidy: true,
-    null: true
-});
-
-addElement("a", {
-    symbol: "a",
-    name: "Ash",
-    acc: 0.1,
-    max: 4,
-    density: 40,
-    friction: 0.1,
-    horizontalMax:3,
-    growGiver:true,
-
-});
-
-addElement("b", {
-    symbol: "b",
-    name: "Bug",
-    graved: false,
-    chaotic: true,
-    bug: true,
-    density: 20,
-    halfLife: 0.1,
-    life: 1,
-    flammable: true,
-});
-
-addElement("c", {
-    symbol: "c",
-    name: "Cloud",
-    acc: -0.3,
-    max: -2,
-    horizontalMax: 2,
-    density: 5,
-    friction: 0,
-    antiGraved: true,
-    graved: false,
-    liquidy: true,
-});
-
-addElement("f", {
-    symbol: "f",
-    name: "Fire",
-    density: 99,
-    friction: 0.5,
-    graved: false,
-    life: 1,
-    halfLife: 0.05,
-    burn: true,
-});
-
-addElement("g", {
-    symbol: "g",
-    name: "Gravium",
-    acc: -1,
-    max: -8,
-    density: 0,
-    friction: 0.5,
-    antiGraved: true,
-    graved: false,
-    life: 1,
-    halfLife: 0.05,
-});
-
-addElement("h", {
-    symbol: "h",
-    name: "Hydrochloric",
-    liquidy: true,
-    density: 15,
-    friction: 0.1,
-    acidSafe: true,
-    acidic: true,
 });
 
 addElement("m", {
@@ -199,12 +251,14 @@ addElement("m", {
     acc: -0.5,
     max: -3,
     density: 5,
-    friction: 0.1,
+    friction: 0,
     fuel: 1,
     antiGraved: true,
     graved: false,
     liquidy: true,
     flammable: true,
+    desc:"flammable gas"
+
 });
 
 addElement("l", {
@@ -218,7 +272,9 @@ addElement("l", {
     flammable: true,
     nonslide: true,
     static:true,
-    graved:false
+    graved:false,
+    desc:"anti-gravity fire wood"
+
 });
 
 addElement("o", {
@@ -232,6 +288,8 @@ addElement("o", {
     fuel: 1,
     horizontalMax: 2,
     flammable: true,
+    desc:"flammable water"
+
 });
 
 addElement("r", {
@@ -242,7 +300,9 @@ addElement("r", {
     max: 10,
     friction: 0.99,
     static:true,
-    graved:false
+    graved:false,
+    desc:"boring materail"
+
 });
 
 addElement("u", {
@@ -253,7 +313,9 @@ addElement("u", {
     max: 10,
     friction: 0.1,
     static:true,
-    graved:false
+    graved:false,
+    desc:"decays to others"
+
 });
 
 addElement("w", {
@@ -266,4 +328,5 @@ addElement("w", {
     friction: 0,
     horizontalMax: 4,
     growGiver:true,
+    desc:'tap'
 });

@@ -29,7 +29,8 @@ main {
     font-size: 12px;
     height: 100dvh;
     .sidePanal {
-        width: 20dvw;
+        min-width: 20dvw;
+        max-width: 25vw;;
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -39,6 +40,19 @@ main {
             // justify-content: center;
             align-items: center;
             gap: 1vh;
+
+        }
+        #buttons{
+            margin: -5px;
+            button{
+                margin: 5px;
+                padding: 5px;
+
+            }
+            .selected{
+                background-color: var(--color);
+                color: var(--background)
+            }
         }
     }
     .canvas {
