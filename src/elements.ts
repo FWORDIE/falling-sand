@@ -25,12 +25,17 @@ export type element = {
     flammable: boolean;
     static: boolean;
     null: boolean;
-    grow:boolean;
-    growth:number;
-    growGiver:boolean;
-    growing:boolean;
-    desc:string;
-    egg:boolean;
+    grow: boolean;
+    growth: number;
+    growGiver: boolean;
+    growing: boolean;
+    desc: string;
+    egg: boolean;
+    explode: boolean;
+    exploding: boolean;
+    quartz: boolean;
+    jam: boolean;
+    kypto:boolean;
 };
 
 const DEFAULTS: Partial<element> = {
@@ -56,12 +61,17 @@ const DEFAULTS: Partial<element> = {
     fuel: 1,
     null: false,
     horizontalMax: 2,
-    grow:false,
-    growth:0,
-    growGiver:false,
-    growing:false,
-    desc:'its nothing yet',
-    egg:false,
+    grow: false,
+    growth: 0,
+    growGiver: false,
+    growing: false,
+    desc: "its nothing yet",
+    egg: false,
+    explode: false,
+    exploding: false,
+    quartz: false,
+    jam: false,
+    kypto:false,
 };
 
 export const addElement = (key: string, elementConfig: Partial<element>) => {
@@ -73,8 +83,6 @@ export const addElement = (key: string, elementConfig: Partial<element>) => {
     elements[key] = configWithDefaults;
 };
 
-
-
 addElement("s", {
     symbol: "s",
     name: "Sand",
@@ -82,10 +90,9 @@ addElement("s", {
     max: 8,
     density: 80,
     friction: 0.2,
-    growGiver:true,
-    horizontalMax:2,
-    desc:"it falls n' heaps"
-
+    growGiver: true,
+    horizontalMax: 2,
+    desc: "it falls n' heaps",
 });
 
 addElement("e", {
@@ -95,10 +102,10 @@ addElement("e", {
     max: 8,
     density: 80,
     friction: 0.2,
-    growGiver:true,
-    horizontalMax:0,
-    egg:true,
-    desc:"smashes into bug"
+    growGiver: true,
+    horizontalMax: 0,
+    egg: true,
+    desc: "smashes into bug",
 });
 
 addElement("·", {
@@ -111,8 +118,8 @@ addElement("·", {
     acidSafe: true,
     liquidy: true,
     null: true,
-    desc:"the void"
-
+    desc: "the void",
+    quartz: true,
 });
 
 addElement("a", {
@@ -122,9 +129,9 @@ addElement("a", {
     max: 2,
     density: 40,
     friction: 0.1,
-    horizontalMax:3,
-    growGiver:true,
-    desc:"it falls, heaps n' nurturers"
+    horizontalMax: 3,
+    growGiver: true,
+    desc: "it falls, heaps n' nurturers",
 });
 
 addElement("b", {
@@ -137,8 +144,7 @@ addElement("b", {
     halfLife: 0.5,
     life: 1,
     flammable: true,
-    desc:"has bug sex or dies"
-
+    desc: "has bug sex or dies",
 });
 
 addElement("d", {
@@ -148,11 +154,10 @@ addElement("d", {
     max: 1,
     density: 45,
     friction: 0.3,
-    horizontalMax:2,
-    growGiver:true,
+    horizontalMax: 2,
+    growGiver: true,
     flammable: true,
-    desc:"dead"
-
+    desc: "dead",
 });
 
 addElement("c", {
@@ -166,7 +171,23 @@ addElement("c", {
     antiGraved: true,
     graved: false,
     liquidy: true,
-    desc:"abstract gas"
+    desc: "abstract gas",
+});
+
+addElement("n", {
+    symbol: "n",
+    name: "Nitrogen-Oxide",
+    acc: -0.3,
+    max: -2,
+    horizontalMax: 2,
+    density: 5,
+    friction: 0,
+    acidic: true,
+    acidSafe: true,
+    antiGraved: true,
+    graved: false,
+    liquidy: true,
+    desc: "acid gas",
 });
 
 addElement("f", {
@@ -178,8 +199,7 @@ addElement("f", {
     life: 1,
     halfLife: 0.05,
     burn: true,
-    desc:"hot"
-
+    desc: "hot",
 });
 
 addElement("g", {
@@ -189,25 +209,26 @@ addElement("g", {
     max: -8,
     density: 0,
     friction: 0.2,
-    horizontalMax:2,
+    horizontalMax: 2,
     antiGraved: true,
     graved: false,
     life: 1,
     halfLife: 0.05,
-    desc:"sand but funky"
-
+    desc: "sand but funky",
 });
 
 addElement("h", {
     symbol: "h",
     name: "Hydrochloric",
     liquidy: true,
-    density: 15,
-    friction: 0.1,
+    density: 20,
+    acc: 0.3,
+    max: 8,
+    friction: 0,
+    horizontalMax: 4,
     acidSafe: true,
     acidic: true,
-    desc:"acid but 'a' was taken"
-
+    desc: "acid but 'a' was taken",
 });
 
 addElement("v", {
@@ -215,17 +236,16 @@ addElement("v", {
     name: "Vine",
     acc: 0.3,
     max: 8,
-    velocity:0.1,
+    velocity: 0.1,
     density: 20,
     friction: 1,
-    horizontalMax:0,
-    grow:true,
-    growth:0,
-    growGiver:true,
-    flammable:true,
-    growing:true,
-    desc:"grows when it can"
-
+    horizontalMax: 0,
+    grow: true,
+    growth: 0,
+    growGiver: true,
+    flammable: true,
+    growing: true,
+    desc: "grows when it can",
 });
 
 addElement("p", {
@@ -233,16 +253,15 @@ addElement("p", {
     name: "Petal",
     acc: 0.3,
     max: 8,
-    velocity:0.1,
+    velocity: 0.1,
     density: 20,
     friction: 1,
-    horizontalMax:0,
-    growth:0,
-    static:true,
-    graved:false,
-    flammable:true,
-    desc:"parts of a flower"
-
+    horizontalMax: 0,
+    growth: 0,
+    static: true,
+    graved: false,
+    flammable: true,
+    desc: "parts of a flower",
 });
 
 addElement("m", {
@@ -257,8 +276,7 @@ addElement("m", {
     graved: false,
     liquidy: true,
     flammable: true,
-    desc:"flammable gas"
-
+    desc: "flammable gas",
 });
 
 addElement("l", {
@@ -271,10 +289,22 @@ addElement("l", {
     fuel: 10,
     flammable: true,
     nonslide: true,
-    static:true,
-    graved:false,
-    desc:"anti-gravity fire wood"
+    static: true,
+    graved: false,
+    desc: "anti-gravity fire wood",
+});
 
+addElement("t", {
+    symbol: "t",
+    name: "TNT",
+    density: 70,
+    acc: 0.4,
+    max: 8,
+
+    static: true,
+    graved: false,
+    explode: true,
+    desc: "goes bomb",
 });
 
 addElement("o", {
@@ -288,8 +318,7 @@ addElement("o", {
     fuel: 1,
     horizontalMax: 2,
     flammable: true,
-    desc:"flammable water"
-
+    desc: "flammable water",
 });
 
 addElement("r", {
@@ -299,10 +328,37 @@ addElement("r", {
     acc: 0.5,
     max: 10,
     friction: 0.99,
-    static:true,
-    graved:false,
-    desc:"boring materail"
+    static: true,
+    graved: false,
+    desc: "boring materail",
+});
 
+addElement("q", {
+    symbol: "q",
+    name: "Quartz",
+    density: 90,
+    acc: 0.5,
+    max: 10,
+    friction: 0.99,
+    static: true,
+    graved: false,
+    quartz: true,
+    desc: "nothing effects this rock",
+    acidSafe: true,
+});
+
+addElement("k", {
+    symbol: "k",
+    name: "Kryptonite",
+    density: 90,
+    acc: 0.5,
+    max: 10,
+    friction: 0.99,
+    static: true,
+    graved: false,
+    kypto:true,
+    desc: "stops everything from working",
+    acidSafe: true,
 });
 
 addElement("u", {
@@ -312,10 +368,9 @@ addElement("u", {
     acc: 1,
     max: 10,
     friction: 0.1,
-    static:true,
-    graved:false,
-    desc:"decays to others"
-
+    static: true,
+    graved: false,
+    desc: "decays to others",
 });
 
 addElement("w", {
@@ -327,6 +382,19 @@ addElement("w", {
     max: 8,
     friction: 0,
     horizontalMax: 4,
-    growGiver:true,
-    desc:'tap'
+    growGiver: true,
+    desc: "tap",
+});
+
+addElement("j", {
+    symbol: "j",
+    name: "Jam",
+    liquidy: true,
+    density: 50,
+    acc: 0.6,
+    max: 8,
+    friction: 0.05,
+    horizontalMax: 2,
+    desc: "bugs get stuck",
+    jam: true,
 });
