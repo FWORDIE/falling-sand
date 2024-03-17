@@ -36,6 +36,7 @@ export type element = {
     quartz: boolean;
     jam: boolean;
     kypto:boolean;
+    x:boolean;
 };
 
 const DEFAULTS: Partial<element> = {
@@ -72,6 +73,7 @@ const DEFAULTS: Partial<element> = {
     quartz: false,
     jam: false,
     kypto:false,
+    x:false,
 };
 
 export const addElement = (key: string, elementConfig: Partial<element>) => {
@@ -397,4 +399,17 @@ addElement("j", {
     horizontalMax: 2,
     desc: "bugs get stuck",
     jam: true,
+});
+
+addElement("x", {
+    symbol: "x",
+    name: "X Device",
+    density: 90,
+    acc: 0.5,
+    max: 10,
+    friction: 0.99,
+    static: true,
+    graved: false,
+    x:true,
+    desc: "I ran out of ideas",
 });

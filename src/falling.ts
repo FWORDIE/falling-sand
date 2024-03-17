@@ -3,7 +3,6 @@ import { element, elements } from "./elements";
 let curSymbolArr: element[];
 let newSymbolArr: element[];
 let oldSymbolArr: element[];
-// let curVelArr: number[];
 let southArr: DirectionArray = [];
 let southEastArr: DirectionArray = [];
 let southWestArr: DirectionArray = [];
@@ -16,7 +15,6 @@ let randomArr: number[] = [];
 
 type DirectionArray = number[] | false[];
 
-let mouseDown: boolean = false;
 let elementSelected: element;
 let size: number;
 let loopID: number;
@@ -28,7 +26,6 @@ let randomArrNum = 0;
 export let framerate = 1000 / 24;
 var timer: number | undefined = undefined;
 
-var charSelect = document.getElementById("char") as HTMLInputElement;
 var sizeSelect = document.getElementById("size") as HTMLInputElement;
 var fontSizeSelect = document.getElementById("font") as HTMLInputElement;
 var pausedSelect = document.getElementById("paused") as HTMLInputElement;
@@ -231,7 +228,7 @@ const createDimensions = () => {
 };
 
 const createSymbolArray = () => {
-    let str = new Array(dimensions.total).fill(elements["·"]);
+    let str = new Array(dimensions.total).fill(elements["s"]);
     curSymbolArr = str;
     newSymbolArr = str;
     console.log(str);
@@ -358,10 +355,11 @@ const doEffects = (x: number, pass: number, direction: boolean) => {
     //Actions
     if (pass !== -1) {
         if (el.acidic && kyptoCheck(x)) acid(x);
-        if (el.explode ) explode(x);
+        if (el.explode) explode(x);
     } else {
         if (el.bug && kyptoCheck(x)) doBugSexOrDie(x, el);
         if (el.burn && kyptoCheck(x)) fired = fire(x, el);
+        if (el.x && kyptoCheck(x)) xDevice(x);
     }
 
     //Movements
@@ -709,8 +707,8 @@ const bloom = (x: number) => {
 };
 
 const explode = (index: number, overide: boolean = false) => {
-    if(!kyptoCheck(index)){
-        return false
+    if (!kyptoCheck(index)) {
+        return false;
     }
     const neighbours = getSurrounding(index);
 
@@ -748,6 +746,34 @@ const explode = (index: number, overide: boolean = false) => {
             }
         }
     }
+};
+
+const xDevice = (index: number) => {
+    // if(curSymbolArr[index].life < 1){
+    //     curSymbolArr[index].life =- 0.1
+    //     return false
+    // }
+    let amountBig = dimensions.columns + 1;
+    let amountSmall = dimensions.columns - 1;
+    let startBig = index % amountBig;
+    let startSmall = index % amountSmall;
+    let destroyArray = [];
+    for (let big = startBig; big <= dimensions.total; big += amountBig) {
+        destroyArray.push(big);
+    }
+    for (let small = startSmall; small < dimensions.total; small += amountSmall) {
+        destroyArray.push(small);
+    }
+    for (let x = 0; x < destroyArray.length; x++) {
+        let pos = destroyArray[x]
+        if (curSymbolArr[pos].explode) {
+            explode(pos, true);
+        } else {
+            destroy(pos);
+        }
+    }
+    destroy(index);
+    // console.log(index, destroyArray)
 };
 
 // const decay = (x: number, el: element) => {
@@ -1009,7 +1035,7 @@ const kyptoCheck = (x: number) => {
             return false;
         }
     }
-    return true
+    return true;
 };
 
 //DEBUG
