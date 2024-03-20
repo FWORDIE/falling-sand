@@ -12,22 +12,26 @@ let northArr: DirectionArray = [];
 let northEastArr: DirectionArray = [];
 let northWestArr: DirectionArray = [];
 let randomArr: number[] = [];
+const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
 
 type DirectionArray = number[] | false[];
 
 let elementSelected: element;
-let size: number;
+let size: number = 1;
 let loopID: number;
 let fontSize: number = 16;
 
 const randomArrAmount = 1000;
 let randomArrNum = 0;
 
+let zDeviceNum: null | number = null;
+let yDeviceNum: null | number = null;
+
 export let framerate = 1000 / 24;
 var timer: number | undefined = undefined;
 
 var sizeSelect = document.getElementById("size") as HTMLInputElement;
-var fontSizeSelect = document.getElementById("font") as HTMLInputElement;
+// var fontSizeSelect = document.getElementById("font") as HTMLInputElement;
 var pausedSelect = document.getElementById("paused") as HTMLInputElement;
 var debugSelect = document.getElementById("debug") as HTMLInputElement;
 const canvas = document.getElementById("Canvas") as HTMLElement;
@@ -51,13 +55,13 @@ export const loop = () => {
         sim();
         // mouseEvents([dimensions.canvasHeight / 2, dimensions.canvasWidth / 2]);
     }
-    if (fontSizeSelect.valueAsNumber != fontSize) {
-        fontSize = fontSizeSelect.valueAsNumber;
-        canvas.style.fontSize = fontSize.toString() + "px";
-        indicatorElem.style.fontSize = fontSize.toString() + "px";
-        clearInterval(loopID);
-        reset();
-    }
+    // if (fontSizeSelect.valueAsNumber != fontSize) {
+    //     fontSize = fontSizeSelect.valueAsNumber;
+    //     canvas.style.fontSize = fontSize.toString() + "px";
+    //     indicatorElem.style.fontSize = fontSize.toString() + "px";
+    //     clearInterval(loopID);
+    //     reset();
+    // }
 };
 
 const sim = () => {
@@ -107,8 +111,36 @@ export const handleKey = debounce((e: KeyboardEvent) => {
     if (e.key === "ArrowRight") {
         console.log("next");
         sim();
+        return true;
     }
+
+    if (parseInt(e.key)) {
+        setSize(parseInt(e.key));
+        return true;
+    }
+    if (alphabet.includes(e.key)) {
+        setChar(e.key);
+        return true;
+    }
+
+    setChar("·");
 });
+
+const setSize = (n: number) => {
+    const info = document.getElementById("size") as HTMLElement;
+    info.innerText = n.toString();
+    size = n;
+};
+
+const setChar = (el: string) => {
+    elementSelected = elements[el];
+    if (elements[el]) {
+        const info = document.getElementById("char") as HTMLElement;
+        const desc = document.getElementById("desc") as HTMLElement;
+        desc.innerText = elementSelected.desc;
+        info.innerText = elementSelected.name;
+    }
+};
 
 const clickDetect = (main: HTMLElement) => {
     main.addEventListener("mousedown", (e: MouseEvent) => {
@@ -157,17 +189,14 @@ const mouseEvents = (pos: number[]) => {
 
     //get options
     const element = elementSelected || elements["s"];
-    const size = +sizeSelect?.value || 1;
     if (size > 1) {
-        for (let x = -size + 1; x < size; x++) {
-            for (let y = -size + 1; y < size; y++) {
-                let pos = x * dimensions.columns + y + index;
-                if (
-                    checkInGrid(pos) &&
-                    Math.floor(index / dimensions.columns) == Math.floor(pos / dimensions.columns) + -x &&
-                    randomNumCheck() &&
-                    Math.abs(x * y) < size - 1
-                ) {
+        let radiusSq = size * size;
+        for (let y1 = -size; y1 <= size; y1++) {
+            for (let x1 = -size; x1 <= size; x1++) {
+                if (x1 * x1 + y1 * y1 <= radiusSq && randomNumCheck()) {
+                    // this.set(x + x1, y + y1, colorFn());
+                    let pos = ((trueY + y1) * dimensions.columns) + (trueX + x1)
+                    // this.grid[y * this.width + x] = color;
                     element.symbol = randomNumCheck() ? element.symbol.toUpperCase() : element.symbol.toLowerCase();
                     curSymbolArr[pos] = { ...element };
                 }
@@ -194,7 +223,10 @@ export const startUp = () => {
     console.log("StartingUp");
     debugSelect.addEventListener("change", debugPanal);
     clickDetect(canvas);
-    addMenuOptions();
+    // addMenuOptions();
+    setSize(size);
+    setChar('s');
+
     reset();
 };
 
@@ -228,7 +260,7 @@ const createDimensions = () => {
 };
 
 const createSymbolArray = () => {
-    let str = new Array(dimensions.total).fill(elements["s"]);
+    let str = new Array(dimensions.total).fill(elements["·"]);
     curSymbolArr = str;
     newSymbolArr = str;
     console.log(str);
@@ -253,14 +285,14 @@ const createChanceArray = () => {
 };
 
 const addMenuOptions = () => {
-    let select = document.getElementById("char") as HTMLSelectElement;
+    // let select = document.getElementById("char") as HTMLSelectElement;
 
-    for (let key in elements) {
-        let opt = document.createElement("option");
-        opt.value = key;
-        opt.innerHTML = elements[key].name;
-        select.appendChild(opt);
-    }
+    // for (let key in elements) {
+    //     let opt = document.createElement("option");
+    //     opt.value = key;
+    //     opt.innerHTML = elements[key].name;
+    //     select.appendChild(opt);
+    // }
 
     const saveButton = document.createElement("button");
     saveButton.innerHTML = "save";
@@ -338,6 +370,15 @@ const iterateOver = () => {
                 doEffects(index, pass, leftToRight);
             }
         }
+        if (pass === -1) {
+            if (zDeviceNum != null) {
+                zDeviceTrigger(zDeviceNum);
+            }
+        } else {
+            if (yDeviceNum != null) {
+                yDeviceTrigger(yDeviceNum);
+            }
+        }
     }
 };
 
@@ -356,10 +397,14 @@ const doEffects = (x: number, pass: number, direction: boolean) => {
     if (pass !== -1) {
         if (el.acidic && kyptoCheck(x)) acid(x);
         if (el.explode) explode(x);
+        if (el.decay && kyptoCheck(x)) decay(x, el);
     } else {
         if (el.bug && kyptoCheck(x)) doBugSexOrDie(x, el);
+        if (el.insect && kyptoCheck(x)) insecticide(x, el);
         if (el.burn && kyptoCheck(x)) fired = fire(x, el);
         if (el.x && kyptoCheck(x)) xDevice(x);
+        if (el.z && kyptoCheck(x)) zDevice(x);
+        if (el.y && kyptoCheck(x)) yDevice(x);
     }
 
     //Movements
@@ -749,10 +794,6 @@ const explode = (index: number, overide: boolean = false) => {
 };
 
 const xDevice = (index: number) => {
-    // if(curSymbolArr[index].life < 1){
-    //     curSymbolArr[index].life =- 0.1
-    //     return false
-    // }
     let amountBig = dimensions.columns + 1;
     let amountSmall = dimensions.columns - 1;
     let startBig = index % amountBig;
@@ -765,7 +806,7 @@ const xDevice = (index: number) => {
         destroyArray.push(small);
     }
     for (let x = 0; x < destroyArray.length; x++) {
-        let pos = destroyArray[x]
+        let pos = destroyArray[x];
         if (curSymbolArr[pos].explode) {
             explode(pos, true);
         } else {
@@ -773,16 +814,66 @@ const xDevice = (index: number) => {
         }
     }
     destroy(index);
-    // console.log(index, destroyArray)
 };
 
-// const decay = (x: number, el: element) => {
-//     // For for when we have all elements
-//     // const alphabet = 'abcdefghijklmnopqrstuvwxyz'
-//     // const max = alphabet.indexOf(el.symbol.toLowerCase())
-//     // const firstelement = randomIntFromInterval(0,max || alphabet.length)
-//     // console.log(firstelement)
-// };
+const zDevice = (index: number) => {
+    if (zDeviceNum === null) {
+        zDeviceNum = index;
+    }
+};
+
+const zDeviceTrigger = (index: number) => {
+    destroy(index);
+    let times = index % dimensions.columns;
+    console.log(times, index);
+    while (times--) {
+        var temp = curSymbolArr.shift() as element;
+        curSymbolArr.push(temp);
+    }
+    zDeviceNum = null;
+};
+
+const yDevice = (index: number) => {
+    if (yDeviceNum === null) {
+        yDeviceNum = index;
+    }
+};
+
+const yDeviceTrigger = (index: number) => {
+    destroy(index);
+    let times = (index % dimensions.columns) * dimensions.columns;
+    console.log(times, index);
+    while (times--) {
+        var temp = curSymbolArr.shift() as element;
+        curSymbolArr.push(temp);
+    }
+    yDeviceNum = null;
+};
+
+const decay = (x: number, el: element) => {
+    if (el.life < 1 || randomNumCheck(0.99)) {
+        return false;
+    }
+
+    const possibleDirections = getSurrounding(x);
+
+    const notAirDirections = possibleDirections.filter((index) => {
+        if (typeof index === "number" && !curSymbolArr[index].null && !curSymbolArr[index].decay) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    if (notAirDirections.length > 0) {
+        const chosenDirection = notAirDirections[randomIntFromInterval(0, notAirDirections.length - 1)];
+        // For for when we have all elements
+        const alphabet = "abcdefghijklmnopqrstuvwxyz·";
+        const firstelement = alphabet[randomIntFromInterval(0, alphabet.length)];
+        curSymbolArr[chosenDirection] = { ...elements[firstelement] };
+        curSymbolArr[x].life = -el.halfLife;
+    }
+};
 
 const chaosMovement = (x: number, el: element) => {
     const possibleDirections = getSurrounding(x);
@@ -851,7 +942,6 @@ const doBugSexOrDie = (x: number, el: element) => {
             }
 
             const chosenDirection = validDirections[randomIntFromInterval(0, validDirections.length - 1)];
-            console.log("sex");
             curSymbolArr[chosenDirection] = { ...elements["e"] };
             return true;
         }
@@ -862,6 +952,66 @@ const doBugSexOrDie = (x: number, el: element) => {
         return false;
     }
 
+    return false;
+};
+
+const insecticide = (x: number, el: element) => {
+    if (el.life <= 0) {
+        destroy(x);
+        return false;
+    }
+    const possibleDirections = getSurrounding(x);
+
+    //bug check
+
+    const bugDirections = possibleDirections.filter((index) => {
+        if (typeof index === "number" && curSymbolArr[index].bug) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    if (bugDirections.length > 0) {
+        const chosenDirection = bugDirections[randomIntFromInterval(0, bugDirections.length - 1)];
+        curSymbolArr[chosenDirection] = { ...elements["d"] };
+        curSymbolArr[x].life -= el.halfLife;
+        return true;
+    }
+
+    //vine check
+
+    const vineDirections = possibleDirections.filter((index) => {
+        if (typeof index === "number" && curSymbolArr[index].plant) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    if (vineDirections.length > 0) {
+        const chosenDirection = vineDirections[randomIntFromInterval(0, vineDirections.length - 1)];
+        curSymbolArr[chosenDirection] = { ...elements["a"] };
+        curSymbolArr[x].life -= el.halfLife;
+        return true;
+    }
+
+    //water check
+
+    const waterDirections = possibleDirections.filter((index) => {
+        if (typeof index === "number" && curSymbolArr[index].water) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    if (waterDirections.length > 0) {
+        const chosenDirection = waterDirections[randomIntFromInterval(0, waterDirections.length - 1)];
+        curSymbolArr[chosenDirection] = { ...elements["h"] };
+        curSymbolArr[x] = { ...elements["n"] };
+        return true;
+    }
     return false;
 };
 
@@ -892,10 +1042,6 @@ const acid = (x: number) => {
 const hatch = (x: number) => {
     curSymbolArr[x] = { ...elements["b"] };
 };
-
-// const casePass = (x: number) => {
-//     curSymbolArr[x].symbol = curSymbolArr[x].symbol.toUpperCase();
-// };
 
 // HELPERS
 const swap = (a: number, b: number) => {

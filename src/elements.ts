@@ -37,6 +37,13 @@ export type element = {
     jam: boolean;
     kypto:boolean;
     x:boolean;
+    z:boolean;
+    y:boolean;
+    insect:boolean;
+    plant:boolean;
+    water:Boolean;
+    decay:boolean;
+
 };
 
 const DEFAULTS: Partial<element> = {
@@ -74,6 +81,12 @@ const DEFAULTS: Partial<element> = {
     jam: false,
     kypto:false,
     x:false,
+    z:false,
+    y:false,
+    insect:false,
+    plant:false,
+    water:false,
+    decay:false
 };
 
 export const addElement = (key: string, elementConfig: Partial<element>) => {
@@ -112,7 +125,7 @@ addElement("e", {
 
 addElement("·", {
     symbol: "·",
-    name: "remove",
+    name: "Eraser",
     graved: false,
     density: 10,
     acc: 0,
@@ -120,7 +133,7 @@ addElement("·", {
     acidSafe: true,
     liquidy: true,
     null: true,
-    desc: "the void",
+    desc: "Creates the void",
     quartz: true,
 });
 
@@ -148,6 +161,20 @@ addElement("b", {
     flammable: true,
     desc: "has bug sex or dies",
 });
+
+
+addElement("i", {
+    symbol: "i",
+    name: "Insecticide",
+    graved: false,
+    chaotic: true,
+    insect: true,
+    density: 20,
+    halfLife: 0.1,
+    life: 1,
+    desc: "kills bugs and plants",
+});
+
 
 addElement("d", {
     symbol: "d",
@@ -247,6 +274,7 @@ addElement("v", {
     growGiver: true,
     flammable: true,
     growing: true,
+    plant:true,
     desc: "grows when it can",
 });
 
@@ -263,6 +291,7 @@ addElement("p", {
     static: true,
     graved: false,
     flammable: true,
+    plant:true,
     desc: "parts of a flower",
 });
 
@@ -302,7 +331,6 @@ addElement("t", {
     density: 70,
     acc: 0.4,
     max: 8,
-
     static: true,
     graved: false,
     explode: true,
@@ -372,6 +400,7 @@ addElement("u", {
     friction: 0.1,
     static: true,
     graved: false,
+    decay:true,
     desc: "decays to others",
 });
 
@@ -386,6 +415,7 @@ addElement("w", {
     horizontalMax: 4,
     growGiver: true,
     desc: "tap",
+    water:true
 });
 
 addElement("j", {
@@ -411,5 +441,31 @@ addElement("x", {
     static: true,
     graved: false,
     x:true,
+    desc: "I ran out of ideas",
+});
+
+addElement("z", {
+    symbol: "z",
+    name: "Z Device",
+    density: 90,
+    acc: 0.5,
+    max: 10,
+    friction: 0.99,
+    static: true,
+    graved: false,
+    z:true,
+    desc: "I ran out of ideas",
+});
+
+addElement("y", {
+    symbol: "y",
+    name: "Y Device",
+    density: 90,
+    acc: 0.5,
+    max: 10,
+    friction: 0.99,
+    static: true,
+    graved: false,
+    y:true,
     desc: "I ran out of ideas",
 });
