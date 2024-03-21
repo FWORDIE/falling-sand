@@ -30,7 +30,7 @@ main {
     height: 100dvh;
     .sidePanal {
         min-width: 20dvw;
-        max-width: 25vw;;
+        max-width: 25vw;
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -40,22 +40,20 @@ main {
             // justify-content: center;
             align-items: center;
             gap: 1vh;
-
         }
-        .info{
+        .info {
             flex-direction: column;
             align-items: flex-start;
         }
-        #buttons{
+        #buttons {
             margin: -5px;
-            button{
+            button {
                 margin: 5px;
                 padding: 5px;
-
             }
-            .selected{
+            .selected {
                 background-color: var(--color);
-                color: var(--background)
+                color: var(--background);
             }
         }
     }
@@ -67,19 +65,39 @@ main {
         white-space: pre-wrap;
         word-wrap: break-word;
         overflow: hidden;
-        line-height: 90%;
+        line-height: 80%;
         user-select: none;
         -moz-user-select: -moz-none;
         -khtml-user-select: none;
         -webkit-user-select: none;
         // text-transform: lowercase;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        border: none;
+        outline: none;
+        background-color: var(--background);
+        resize: none;
+        &:focus-visible {
+            border: none;
+            outline: none;
+            background-color: var(--background);
+        }
+        &::selection {
+            color: var(--color);
+            background: var(--background);
+            opacity: 0;
+        }
     }
     #Indicator {
         position: absolute;
         z-index: -1;
         font-size: 16px;
 
-        line-height: 90%;
+        line-height: 80%;
     }
 }
 

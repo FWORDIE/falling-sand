@@ -1,6 +1,5 @@
 import "./style.scss";
 import { handleKey,  startUp } from "./falling.ts";
-import { testArrays } from "./testScripts.ts";
 
 
 

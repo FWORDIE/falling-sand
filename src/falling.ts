@@ -20,6 +20,8 @@ let elementSelected: element;
 let size: number = 1;
 let loopID: number;
 let fontSize: number = 16;
+let textMode: boolean = false;
+let paused: boolean = false;
 
 const randomArrAmount = 1000;
 let randomArrNum = 0;
@@ -34,8 +36,9 @@ var sizeSelect = document.getElementById("size") as HTMLInputElement;
 // var fontSizeSelect = document.getElementById("font") as HTMLInputElement;
 var pausedSelect = document.getElementById("paused") as HTMLInputElement;
 var debugSelect = document.getElementById("debug") as HTMLInputElement;
-const canvas = document.getElementById("Canvas") as HTMLElement;
+const canvas = document.getElementById("Canvas") as HTMLTextAreaElement;
 var indicatorElem = document.getElementById("Indicator") as HTMLElement;
+
 let dimensions = {
     canvasWidth: 0,
     canvasHeight: 0,
@@ -51,17 +54,9 @@ let dimensions = {
 //MAIN LOOP
 
 export const loop = () => {
-    if (!pausedSelect.checked) {
+    if (!paused) {
         sim();
-        // mouseEvents([dimensions.canvasHeight / 2, dimensions.canvasWidth / 2]);
     }
-    // if (fontSizeSelect.valueAsNumber != fontSize) {
-    //     fontSize = fontSizeSelect.valueAsNumber;
-    //     canvas.style.fontSize = fontSize.toString() + "px";
-    //     indicatorElem.style.fontSize = fontSize.toString() + "px";
-    //     clearInterval(loopID);
-    //     reset();
-    // }
 };
 
 const sim = () => {
@@ -70,20 +65,15 @@ const sim = () => {
 };
 
 const writetoDom = () => {
-    // TODO seems to stop loop so nothing updates, should just stop rendering
-    // if (newSymbolArr == oldSymbolArr) {
-    //     return;
-    // }
+
     let visArr: string[] | number[] = new Array(dimensions.total).fill("").map((element, index) => {
         return curSymbolArr[index].symbol;
     });
-    // if (showVelSelect.checked) {
-    //     visArr = curVelArr;
-    // }
+
     if (canvas) {
         const string = visArr.join("");
         oldSymbolArr = newSymbolArr.slice(0);
-        canvas.textContent = string;
+        canvas.value = string;
     }
 };
 
@@ -110,15 +100,19 @@ function debounce(func: (...args: any[]) => void, timeout = 100): (...args: any[
 export const handleKey = debounce((e: KeyboardEvent) => {
     if (e.key === "ArrowRight") {
         console.log("next");
-        sim();
-        return true;
+        if (paused) {
+            sim();
+            return true;
+        }
     }
 
-    if (parseInt(e.key)) {
+    if(textMode && e.key )
+
+    if (parseInt(e.key) && !textMode) {
         setSize(parseInt(e.key));
         return true;
     }
-    if (alphabet.includes(e.key)) {
+    if (alphabet.includes(e.key)&& !textMode) {
         setChar(e.key);
         return true;
     }
@@ -144,6 +138,7 @@ const setChar = (el: string) => {
 
 const clickDetect = (main: HTMLElement) => {
     main.addEventListener("mousedown", (e: MouseEvent) => {
+        console.log("added");
         let pos = [e.clientX - dimensions.canvasLeft, e.clientY - dimensions.canvasTop];
         mouseEvents(pos);
         window.addEventListener("mousemove", (e) => {
@@ -177,6 +172,10 @@ const clickDetect = (main: HTMLElement) => {
 };
 
 const mouseEvents = (pos: number[]) => {
+    if (textMode) {
+        paused = true;
+        return false;
+    }
     //find index
     let trueX = Math.floor(pos[0] / dimensions.charWidth);
     let trueY = Math.floor(pos[1] / dimensions.charHeight);
@@ -195,7 +194,7 @@ const mouseEvents = (pos: number[]) => {
             for (let x1 = -size; x1 <= size; x1++) {
                 if (x1 * x1 + y1 * y1 <= radiusSq && randomNumCheck()) {
                     // this.set(x + x1, y + y1, colorFn());
-                    let pos = ((trueY + y1) * dimensions.columns) + (trueX + x1)
+                    let pos = (trueY + y1) * dimensions.columns + (trueX + x1);
                     // this.grid[y * this.width + x] = color;
                     element.symbol = randomNumCheck() ? element.symbol.toUpperCase() : element.symbol.toLowerCase();
                     curSymbolArr[pos] = { ...element };
@@ -203,7 +202,7 @@ const mouseEvents = (pos: number[]) => {
             }
         }
     } else {
-        element.symbol = randomNumCheck() ? element.symbol.toUpperCase() : element.symbol;
+        element.symbol = randomNumCheck() ? element.symbol.toUpperCase() : element.symbol.toLowerCase();
         curSymbolArr[index] = { ...element };
     }
 };
@@ -217,16 +216,211 @@ const debugPanal = () => {
     }
 };
 
+const addMenuOptions = () => {
+    const saveButton = document.createElement("button");
+    saveButton.innerHTML = "save";
+    saveButton.addEventListener("click", () => {
+        save();
+    });
+    document.getElementById("loadSave")?.append(saveButton);
+
+    const loadButton = document.createElement("button");
+    loadButton.innerHTML = "load";
+    loadButton.addEventListener("click", () => {
+        load();
+    });
+    document.getElementById("loadSave")?.append(loadButton);
+
+    const resetButton = document.createElement("button");
+    resetButton.innerHTML = "reset";
+    resetButton.addEventListener("click", () => {
+        reset();
+    });
+    document.getElementById("loadSave")?.append(resetButton);
+
+    const textModeCheckbox = document.getElementById("text") as HTMLInputElement;
+    textModeCheckbox.addEventListener("change", () => {
+        textModeChange();
+    });
+
+    pausedSelect.addEventListener("change", () => {
+        pausedChange();
+    });
+};
+
+const textModeChange = (startUp = false) => {
+    if (textMode || startUp) {
+        textMode = false;
+        canvas.readOnly = true;
+
+    } else {
+        textMode = true;
+        canvas.readOnly = false;
+    }
+};
+
+const pausedChange = (startUp = false) => {
+    if (paused || startUp) {
+        paused = false;
+    } else {
+        paused = true;
+    }
+};
+
+const selectElement = (key: string, name: string) => {
+    console.log(key, name);
+    const options = document.getElementById("buttons") as HTMLElement;
+    const buttons = options.querySelectorAll(".selected");
+    const selected = document.getElementById(name) as HTMLElement;
+    buttons.forEach((button) => {
+        button.classList.remove("selected");
+    });
+
+    elementSelected = elements[key];
+
+    selected.classList.add("selected");
+};
+
+const save = () => {
+    let numEdits = 0;
+    const saveObject = curSymbolArr.map((element: element) => {
+        let tempElement: Partial<element> = {};
+        let comparsionElement = elements[element.id] as element;
+        tempElement.id = comparsionElement.id;
+        Object.entries(element).map(([key, value]) => {
+            //@ts-ignore
+            if (value !== comparsionElement[key]) {
+                console.log("uploaded");
+                numEdits++;
+                //@ts-ignore
+                tempElement[key] = value;
+            }
+            return;
+        });
+
+        return { ...tempElement };
+    });
+    localStorage.setItem("newState", JSON.stringify(saveObject));
+    console.log("Saved New at size:" + JSON.stringify(saveObject).length + "num Edits: " + numEdits);
+};
+
+const load = () => {
+    let numEdits = 0;
+    const newState = localStorage.getItem("newState");
+
+    if (newState) {
+        const tempArray = JSON.parse(newState);
+        curSymbolArr = tempArray.map((element: Partial<element> & { id: string }) => {
+            return stateParsing(element);
+        });
+        console.log("NumEdits2:" + numEdits);
+    }
+};
+
+const textModeSetUp = () => {
+    canvas.addEventListener("input", textModeHandler);
+    canvas.addEventListener("keydown", submitOnEnter)
+};
+
+const submitOnEnter = (event:KeyboardEvent) =>{ 
+    if (event.which === 13 && !event.shiftKey && textMode) {
+        if (!event.repeat) {
+            curSymbolArr = textParser() as element[]
+            textModeChange()
+            pausedChange()
+        }
+
+        event.preventDefault(); // Prevents the addition of a new line in the text field
+    }
+}
+
+const textModeHandler = (e: Event) => {
+    const inputEvent = e as InputEvent;
+    let cursorPoint = 0;
+    switch (inputEvent.inputType) {
+        case "insertText":
+            cursorPoint = insertText();
+            console.log("insert");
+            break;
+        case "insertLineBreak":
+            console.log("lineBreak");
+            break;
+        case "insertFromPaste":
+            cursorPoint = insertFromPaste(inputEvent);
+            console.log("paste");
+            break;
+        case "deleteContentBackward":
+            cursorPoint = deleteContentBackward();
+            console.log("delete back");
+            break;
+        case "deleteContentForward":
+            cursorPoint = deleteContentBackward();
+            console.log("delete forward");
+            break;
+    }
+    canvas.value = replaceNonAlphabetChars(canvas.value);
+
+    canvas.selectionStart = cursorPoint;
+    canvas.selectionEnd = cursorPoint;
+};
+
+const textParser = () => {
+    let tempArray: Partial<element>[] = [];
+    let stringArray = canvas.value.split("");
+    console.log(stringArray)
+
+    tempArray = stringArray.map((symbol:string) => {
+        let el = { ...(elements[symbol.toLowerCase()] || elements["·"]) }
+        el.symbol = symbol;
+        return el
+    });
+    console.log(stringArray)
+    console.log(tempArray)
+
+    return tempArray
+};
+
+const insertText = () => {
+    const orgLength = canvas.value.length;
+    const orgSelection = canvas.selectionStart;
+    const p1 = canvas.value.slice(0, orgSelection);
+    const p2 = canvas.value.slice(orgSelection + 1, orgLength);
+    canvas.value = p1 + p2;
+    return p1.length;
+};
+const insertFromPaste = (inputEvent:InputEvent) => {
+    const data = inputEvent.data || ''
+    const orgLength = canvas.value.length;
+    const orgSelection = canvas.selectionStart;
+    const p1 = canvas.value.slice(0, orgSelection);
+    const p2 = canvas.value.slice(orgSelection + data.length, orgLength);
+    canvas.value = p1 + p2;
+    return p1.length;
+};
+
+const deleteContentBackward = () => {
+    const orgLength = canvas.value.length;
+    const orgSelection = canvas.selectionStart;
+    const p1 = canvas.value.slice(0, orgSelection);
+    const p2 = canvas.value.slice(orgSelection, orgLength);
+    canvas.value = p1 + "·" + p2;
+    return p1.length;
+};
+
+ 
+
 // INIT FUNCTIONS
 
 export const startUp = () => {
-    console.log("StartingUp");
+    console.log("StartingUp", canvas);
     debugSelect.addEventListener("change", debugPanal);
     clickDetect(canvas);
-    // addMenuOptions();
+    addMenuOptions();
     setSize(size);
-    setChar('s');
-
+    setChar("s");
+    // textModeChange(true);
+    // pausedChange(true);
+    // textModeSetUp();
     reset();
 };
 
@@ -282,74 +476,6 @@ const createDirectionArrays = () => {
 const createChanceArray = () => {
     randomArr = new Array(randomArrAmount).fill(0).map(() => +((Math.random() * 10) / 10).toFixed(6));
     console.log(randomArr);
-};
-
-const addMenuOptions = () => {
-    // let select = document.getElementById("char") as HTMLSelectElement;
-
-    // for (let key in elements) {
-    //     let opt = document.createElement("option");
-    //     opt.value = key;
-    //     opt.innerHTML = elements[key].name;
-    //     select.appendChild(opt);
-    // }
-
-    const saveButton = document.createElement("button");
-    saveButton.innerHTML = "save";
-    saveButton.addEventListener("click", () => {
-        save();
-    });
-    document.getElementById("loadSave")?.append(saveButton);
-
-    const loadButton = document.createElement("button");
-    loadButton.innerHTML = "load";
-    loadButton.addEventListener("click", () => {
-        load();
-    });
-    document.getElementById("loadSave")?.append(loadButton);
-
-    let options = document.getElementById("buttons") as HTMLElement;
-
-    for (let key in elements) {
-        let opt = document.createElement("button");
-        opt.value = key;
-        opt.innerHTML = elements[key].name;
-        opt.title = elements[key].desc;
-        opt.id = elements[key].name;
-        if (key == "s") {
-            opt.classList.add("selected");
-        }
-        opt.addEventListener("click", () => {
-            selectElement(key, elements[key].name);
-        });
-        options.appendChild(opt);
-    }
-};
-
-const selectElement = (key: string, name: string) => {
-    console.log(key, name);
-    const options = document.getElementById("buttons") as HTMLElement;
-    const buttons = options.querySelectorAll(".selected");
-    const selected = document.getElementById(name) as HTMLElement;
-    buttons.forEach((button) => {
-        button.classList.remove("selected");
-    });
-
-    elementSelected = elements[key];
-
-    selected.classList.add("selected");
-};
-
-const save = () => {
-    console.log(JSON.stringify(curSymbolArr).length);
-    localStorage.setItem("state", JSON.stringify(curSymbolArr));
-};
-
-const load = () => {
-    const state = localStorage.getItem("state");
-    if (state) {
-        curSymbolArr = JSON.parse(state);
-    }
 };
 
 // EFFECTRS
@@ -1182,6 +1308,26 @@ const kyptoCheck = (x: number) => {
         }
     }
     return true;
+};
+
+const stateParsing = (element: Partial<element> & { id: string }) => {
+    let tempElement = { ...elements[element.id] };
+    Object.entries(element).map(([key, value]) => {
+        if (key === "id") {
+            return;
+        }
+        //@ts-ignore
+        if (key === "symbol" && value.toLowerCase() === value) {
+            //@ts-ignore
+            tempElement[key] = value;
+        }
+        return;
+    });
+    return tempElement;
+};
+
+const replaceNonAlphabetChars = (str: string) => {
+    return str.replace(/[^A-Za-z]/g, "·");
 };
 
 //DEBUG

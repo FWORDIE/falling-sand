@@ -43,6 +43,7 @@ export type element = {
     plant:boolean;
     water:Boolean;
     decay:boolean;
+    id:string
 
 };
 
@@ -86,7 +87,8 @@ const DEFAULTS: Partial<element> = {
     insect:false,
     plant:false,
     water:false,
-    decay:false
+    decay:false,
+    id:''
 };
 
 export const addElement = (key: string, elementConfig: Partial<element>) => {
@@ -96,6 +98,7 @@ export const addElement = (key: string, elementConfig: Partial<element>) => {
     } as element;
 
     elements[key] = configWithDefaults;
+    elements[key].id = elements[key].symbol
 };
 
 addElement("s", {

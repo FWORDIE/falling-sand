@@ -48,6 +48,10 @@
                         ---
                     </div>
                     <div class="option">
+                        <label for="debug">text Mode</label>
+                        <input type="checkbox" name="text" id="text">
+                    </div>
+                    <div class="option">
                         <label for="paused">paused</label>
                         <input type="checkbox" name="paused" id="paused">
                     </div>
@@ -65,13 +69,9 @@
                     <div class="option" id="loadSave">
           
                     </div>
-                    <div class="option" id="debugPanal" style="display:none;">
-                        <p>Debug Panel</p>
-                        <div class="general" id="generalPanal"></div>
-                        <div class="symbol" id="symbolPanal"></div>
-                    </div>
+
                 </div>
-                <div id="Indicator">X</div><div id="Canvas" class="canvas"></div>
+                <div id="Indicator">X</div><textarea id="Canvas" class="canvas" readonly></textarea>
             </main>
         </div>
         <script type="module" src="/src/main.ts"></script>
