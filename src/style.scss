@@ -1,8 +1,5 @@
 :root {
     font-family: "Bergen Mono";
-    font-weight: bolder;
-    line-height: 1.5;
-    font-weight: 400;
 
     color-scheme: light dark;
     --color: rgba(255, 255, 255, 0.87);
@@ -23,15 +20,14 @@
 
 main {
     display: flex;
+    flex-direction: column;
     padding: 1dvw;
     color: var(--color);
     background-color: var(--background);
     font-size: 12px;
     height: 100dvh;
     .sidePanal {
-        min-width: 20dvw;
-        max-width: 25vw;
-        height: 100%;
+        height: auto;
         display: flex;
         flex-direction: column;
         gap: 1vh;
@@ -41,9 +37,30 @@ main {
             align-items: center;
             gap: 1vh;
         }
-        .info {
-            flex-direction: column;
+        .line {
+            display: flex;
             align-items: flex-start;
+            column-gap: 1.5vw;
+            row-gap: 0.5vw;
+            flex-wrap: wrap;
+            
+            p,a {
+                display: block;
+            }
+            .logo {
+                font-weight: 700;
+            }
+            .pair{
+                display: flex;
+                gap: 5px;
+                .italic{
+                    font-style: italic;
+                }
+
+                &.hidden{
+                    display: none;
+                }
+            }
         }
         #buttons {
             margin: -5px;
@@ -58,10 +75,12 @@ main {
         }
     }
     .canvas {
+        font-family: "Bergen Mono";
+
         height: 100%;
-        width: 80dvw;
+        width: 100%;
         contain: strict;
-        font-size: 16px;
+        font-size: 18px;
         white-space: pre-wrap;
         word-wrap: break-word;
         overflow: hidden;
@@ -88,15 +107,15 @@ main {
         }
         &::selection {
             color: var(--color);
-            background: var(--background);
+            // background: var(--background);
             opacity: 0;
         }
+
     }
     #Indicator {
         position: absolute;
         z-index: -1;
-        font-size: 16px;
-
+        font-size: 18px;
         line-height: 80%;
     }
 }
@@ -106,4 +125,16 @@ main {
     font-style: normal;
     font-weight: 300;
     src: url("fonts/BergenMono-Regular.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Bergen Mono";
+    font-style: normal;
+    font-weight: 700;
+    src: url("fonts/BergenMono-Bold.woff2") format("woff2");
+}
+@font-face {
+    font-family: "Bergen Mono";
+    font-style: italic;
+    font-weight: 300;
+    src: url("fonts/BergenMono-Italic.woff2") format("woff2");
 }

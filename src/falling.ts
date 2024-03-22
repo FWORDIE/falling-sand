@@ -12,6 +12,7 @@ let northArr: DirectionArray = [];
 let northEastArr: DirectionArray = [];
 let northWestArr: DirectionArray = [];
 let randomArr: number[] = [];
+let oldArrs: element[][] = [];
 const alphabet = "abcdefghijklmnopqrstuvwxyz".split("");
 
 type DirectionArray = number[] | false[];
@@ -19,7 +20,6 @@ type DirectionArray = number[] | false[];
 let elementSelected: element;
 let size: number = 1;
 let loopID: number;
-let fontSize: number = 16;
 let textMode: boolean = false;
 let paused: boolean = false;
 
@@ -32,12 +32,10 @@ let yDeviceNum: null | number = null;
 export let framerate = 1000 / 24;
 var timer: number | undefined = undefined;
 
-var sizeSelect = document.getElementById("size") as HTMLInputElement;
-// var fontSizeSelect = document.getElementById("font") as HTMLInputElement;
-var pausedSelect = document.getElementById("paused") as HTMLInputElement;
-var debugSelect = document.getElementById("debug") as HTMLInputElement;
+
 const canvas = document.getElementById("Canvas") as HTMLTextAreaElement;
 var indicatorElem = document.getElementById("Indicator") as HTMLElement;
+const controls = document.getElementById("controls");
 
 let dimensions = {
     canvasWidth: 0,
@@ -62,11 +60,18 @@ export const loop = () => {
 const sim = () => {
     iterateOver();
     writetoDom();
+    writeOld();
+};
+
+const writeOld = () => {
+    if (oldArrs.length > 1000) {
+        oldArrs.shift();
+    }
+    oldArrs.push(curSymbolArr.slice(0));
 };
 
 const writetoDom = () => {
-
-    let visArr: string[] | number[] = new Array(dimensions.total).fill("").map((element, index) => {
+    let visArr: string[] | number[] = new Array(curSymbolArr.length).fill("").map((element, index) => {
         return curSymbolArr[index].symbol;
     });
 
@@ -99,29 +104,86 @@ function debounce(func: (...args: any[]) => void, timeout = 100): (...args: any[
 
 export const handleKey = debounce((e: KeyboardEvent) => {
     if (e.key === "ArrowRight") {
-        console.log("next");
         if (paused) {
+            console.log("Next");
             sim();
             return true;
         }
+        return;
     }
 
-    if(textMode && e.key )
+    if (e.key === "ArrowLeft") {
+        if (oldArrs.length < 1) {
+            console.log("No history Left");
+        }
+        if (paused) {
+            console.log("Back");
+            curSymbolArr = oldArrs[oldArrs.length - 1];
+            writetoDom();
+            oldArrs.pop();
+            return true;
+        }
+        return;
+    }
+
+    if (e.key === "Enter" && !e.shiftKey) {
+        if (!e.repeat) {
+            curSymbolArr = textParser() as element[];
+            pausedChange();
+        }
+
+        e.preventDefault(); // Prevents the addition of a new line in the text field
+        return;
+    }
+
+    if (e.key === "R" && !e.shiftKey) {
+        if (!e.repeat) {
+            reset();
+        }
+
+        e.preventDefault(); // Prevents the addition of a new line in the text field
+        return;
+    }
+
+    if (e.key === "S" && e.shiftKey) {
+        if (!e.repeat) {
+            console.log("Save");
+            save();
+        }
+        e.preventDefault(); // Prevents the addition of a new line in the text field
+        return;
+    }
+
+    if (e.key === "L" && e.shiftKey) {
+        if (!e.repeat) {
+            console.log("Load");
+            load();
+        }
+        e.preventDefault(); // Prevents the addition of a new line in the text field
+        return;
+    }
 
     if (parseInt(e.key) && !textMode) {
         setSize(parseInt(e.key));
         return true;
     }
-    if (alphabet.includes(e.key)&& !textMode) {
+    if (alphabet.includes(e.key) && !textMode) {
         setChar(e.key);
         return true;
     }
-
-    setChar("·");
+    if (e.key === "Tab") {
+        textModeChange();
+        return true;
+    }
+    if (!e.shiftKey || e.key === "Enter") {
+        setChar("·");
+        return true;
+    }
 });
 
 const setSize = (n: number) => {
-    const info = document.getElementById("size") as HTMLElement;
+    console.log(n);
+    const info = document.getElementById("sizeLabel") as HTMLElement;
     info.innerText = n.toString();
     size = n;
 };
@@ -129,8 +191,8 @@ const setSize = (n: number) => {
 const setChar = (el: string) => {
     elementSelected = elements[el];
     if (elements[el]) {
-        const info = document.getElementById("char") as HTMLElement;
-        const desc = document.getElementById("desc") as HTMLElement;
+        const info = document.getElementById("elementLabel") as HTMLElement;
+        const desc = document.getElementById("descLabel") as HTMLElement;
         desc.innerText = elementSelected.desc;
         info.innerText = elementSelected.name;
     }
@@ -138,7 +200,6 @@ const setChar = (el: string) => {
 
 const clickDetect = (main: HTMLElement) => {
     main.addEventListener("mousedown", (e: MouseEvent) => {
-        console.log("added");
         let pos = [e.clientX - dimensions.canvasLeft, e.clientY - dimensions.canvasTop];
         mouseEvents(pos);
         window.addEventListener("mousemove", (e) => {
@@ -181,11 +242,6 @@ const mouseEvents = (pos: number[]) => {
     let trueY = Math.floor(pos[1] / dimensions.charHeight);
     let index = trueY * dimensions.columns + trueX;
 
-    if (debugSelect.checked) {
-        debugCell(index);
-        return;
-    }
-
     //get options
     const element = elementSelected || elements["s"];
     if (size > 1) {
@@ -217,72 +273,79 @@ const debugPanal = () => {
 };
 
 const addMenuOptions = () => {
-    const saveButton = document.createElement("button");
-    saveButton.innerHTML = "save";
-    saveButton.addEventListener("click", () => {
-        save();
-    });
-    document.getElementById("loadSave")?.append(saveButton);
-
-    const loadButton = document.createElement("button");
-    loadButton.innerHTML = "load";
-    loadButton.addEventListener("click", () => {
-        load();
-    });
-    document.getElementById("loadSave")?.append(loadButton);
-
-    const resetButton = document.createElement("button");
-    resetButton.innerHTML = "reset";
-    resetButton.addEventListener("click", () => {
-        reset();
-    });
-    document.getElementById("loadSave")?.append(resetButton);
-
-    const textModeCheckbox = document.getElementById("text") as HTMLInputElement;
-    textModeCheckbox.addEventListener("change", () => {
-        textModeChange();
-    });
-
-    pausedSelect.addEventListener("change", () => {
-        pausedChange();
-    });
+    // const saveButton = document.createElement("button");
+    // saveButton.innerHTML = "save";
+    // saveButton.addEventListener("click", () => {
+    //     save();
+    // });
+    // document.getElementById("loadSave")?.append(saveButton);
+    // const loadButton = document.createElement("button");
+    // loadButton.innerHTML = "load";
+    // loadButton.addEventListener("click", () => {
+    //     load();
+    // });
+    // document.getElementById("loadSave")?.append(loadButton);
+    // const resetButton = document.createElement("button");
+    // resetButton.innerHTML = "reset";
+    // resetButton.addEventListener("click", () => {
+    //     reset();
+    // });
+    // document.getElementById("loadSave")?.append(resetButton);
+    // const textModeCheckbox = document.getElementById("text") as HTMLInputElement;
+    // textModeCheckbox.addEventListener("change", () => {
+    //     textModeChange();
+    // });
+    // pausedSelect.addEventListener("change", () => {
+    //     pausedChange();
+    // });
 };
 
 const textModeChange = (startUp = false) => {
+    let label = document.getElementById("modeLabel") as HTMLElement;
+
     if (textMode || startUp) {
         textMode = false;
         canvas.readOnly = true;
-
+        canvas.style.cursor = "default";
+        label.innerHTML = "Brush";
     } else {
         textMode = true;
         canvas.readOnly = false;
+        canvas.style.cursor = "text";
+        label.innerHTML = "Text";
+        pausedChange(false, true);
     }
+
+    updateUI();
 };
 
-const pausedChange = (startUp = false) => {
-    if (paused || startUp) {
-        paused = false;
-    } else {
-        paused = true;
+const pausedChange = (startUp = false, forced = false) => {
+    let label = document.getElementById("stateLabel");
+    if (label) {
+        if (paused || startUp) {
+            paused = false;
+            label.innerHTML = "Playing";
+            console.log("Play");
+        } else {
+            paused = true;
+            label.innerHTML = "Paused";
+            console.log("Pause");
+        }
+        if (forced) {
+            paused = true;
+            label.innerHTML = "Paused";
+            console.log("Pause");
+        }
     }
-};
-
-const selectElement = (key: string, name: string) => {
-    console.log(key, name);
-    const options = document.getElementById("buttons") as HTMLElement;
-    const buttons = options.querySelectorAll(".selected");
-    const selected = document.getElementById(name) as HTMLElement;
-    buttons.forEach((button) => {
-        button.classList.remove("selected");
-    });
-
-    elementSelected = elements[key];
-
-    selected.classList.add("selected");
+    updateUI();
 };
 
 const save = () => {
-    let numEdits = 0;
+    const saveObject = makeSave();
+    localStorage.setItem("newState", JSON.stringify(saveObject));
+};
+
+const makeSave = () => {
     const saveObject = curSymbolArr.map((element: element) => {
         let tempElement: Partial<element> = {};
         let comparsionElement = elements[element.id] as element;
@@ -290,9 +353,7 @@ const save = () => {
         Object.entries(element).map(([key, value]) => {
             //@ts-ignore
             if (value !== comparsionElement[key]) {
-                console.log("uploaded");
-                numEdits++;
-                //@ts-ignore
+                5; //@ts-ignore
                 tempElement[key] = value;
             }
             return;
@@ -300,8 +361,7 @@ const save = () => {
 
         return { ...tempElement };
     });
-    localStorage.setItem("newState", JSON.stringify(saveObject));
-    console.log("Saved New at size:" + JSON.stringify(saveObject).length + "num Edits: " + numEdits);
+    return saveObject;
 };
 
 const load = () => {
@@ -319,47 +379,47 @@ const load = () => {
 
 const textModeSetUp = () => {
     canvas.addEventListener("input", textModeHandler);
-    canvas.addEventListener("keydown", submitOnEnter)
+    canvas.addEventListener("click", () => {
+        if (textMode) {
+            pausedChange(false, true);
+        }
+    });
+    canvas.addEventListener("keydown", submitOnEnter);
 };
 
-const submitOnEnter = (event:KeyboardEvent) =>{ 
-    if (event.which === 13 && !event.shiftKey && textMode) {
-        if (!event.repeat) {
-            curSymbolArr = textParser() as element[]
-            textModeChange()
-            pausedChange()
-        }
-
-        event.preventDefault(); // Prevents the addition of a new line in the text field
-    }
-}
+const submitOnEnter = (event: KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey && textMode) event.preventDefault();
+};
 
 const textModeHandler = (e: Event) => {
     const inputEvent = e as InputEvent;
     let cursorPoint = 0;
+
     switch (inputEvent.inputType) {
         case "insertText":
             cursorPoint = insertText();
-            console.log("insert");
             break;
         case "insertLineBreak":
-            console.log("lineBreak");
             break;
         case "insertFromPaste":
             cursorPoint = insertFromPaste(inputEvent);
-            console.log("paste");
             break;
         case "deleteContentBackward":
             cursorPoint = deleteContentBackward();
-            console.log("delete back");
             break;
         case "deleteContentForward":
             cursorPoint = deleteContentBackward();
-            console.log("delete forward");
             break;
     }
-    canvas.value = replaceNonAlphabetChars(canvas.value);
 
+    if (canvas.value.length < dimensions.total) {
+        const missing = dimensions.total - canvas.value.length;
+        const p1 = canvas.value.slice(0, cursorPoint);
+        const p2 = canvas.value.slice(cursorPoint, canvas.value.length);
+        canvas.value = p1 + "!".repeat(missing) + p2;
+    }
+
+    canvas.value = replaceNonAlphabetChars(canvas.value);
     canvas.selectionStart = cursorPoint;
     canvas.selectionEnd = cursorPoint;
 };
@@ -367,17 +427,14 @@ const textModeHandler = (e: Event) => {
 const textParser = () => {
     let tempArray: Partial<element>[] = [];
     let stringArray = canvas.value.split("");
-    console.log(stringArray)
 
-    tempArray = stringArray.map((symbol:string) => {
-        let el = { ...(elements[symbol.toLowerCase()] || elements["·"]) }
+    tempArray = stringArray.map((symbol: string) => {
+        let el = { ...(elements[symbol.toLowerCase()] || elements["·"]) };
         el.symbol = symbol;
-        return el
+        return el;
     });
-    console.log(stringArray)
-    console.log(tempArray)
 
-    return tempArray
+    return tempArray;
 };
 
 const insertText = () => {
@@ -385,17 +442,42 @@ const insertText = () => {
     const orgSelection = canvas.selectionStart;
     const p1 = canvas.value.slice(0, orgSelection);
     const p2 = canvas.value.slice(orgSelection + 1, orgLength);
+
     canvas.value = p1 + p2;
+
     return p1.length;
 };
-const insertFromPaste = (inputEvent:InputEvent) => {
-    const data = inputEvent.data || ''
+
+const insertFromPaste = (inputEvent: InputEvent) => {
+    const data = inputEvent.data || "";
+    const parsedData = parseData(data);
     const orgLength = canvas.value.length;
-    const orgSelection = canvas.selectionStart;
-    const p1 = canvas.value.slice(0, orgSelection);
-    const p2 = canvas.value.slice(orgSelection + data.length, orgLength);
-    canvas.value = p1 + p2;
-    return p1.length;
+    let orgSelection = canvas.selectionStart;
+    const p1clear = canvas.value.slice(0, orgSelection - data.length);
+    const p2clear = canvas.value.slice(orgSelection, orgLength);
+    canvas.value = p1clear + p2clear;
+    let tempValue = canvas.value;
+    orgSelection -= data.length;
+
+    for (let x = 0; x < parsedData.length; x++) {
+        const thisData = parsedData[x];
+        if (orgSelection + thisData.length > dimensions.total) {
+            console.log("fail:", orgSelection, thisData.length, dimensions.total);
+            break;
+        }
+
+        const p1 = tempValue.slice(0, orgSelection);
+        const p2 = tempValue.slice(orgSelection + parsedData[x].length, orgLength);
+        tempValue = p1 + thisData + p2;
+        orgSelection += (Math.floor(parsedData[x].length / dimensions.columns) + 1) * dimensions.columns;
+    }
+    canvas.value = tempValue;
+
+    return orgSelection;
+};
+
+const parseData = (string: string) => {
+    return string.split(/\r?\n|\r|\n/g);
 };
 
 const deleteContentBackward = () => {
@@ -407,20 +489,37 @@ const deleteContentBackward = () => {
     return p1.length;
 };
 
- 
+const updateUI = () => {
+    let controlPairs = controls?.getElementsByClassName("pair");
+
+    if (controlPairs) {
+        for (let item of controlPairs) {
+            item.classList.remove("hidden");
+            if (item.classList.contains("paused") && !paused) {
+                item.classList.add("hidden");
+            }
+            if (item.classList.contains("text") && !textMode) {
+                item.classList.add("hidden");
+            }
+            if (item.classList.contains("brush") && textMode) {
+                item.classList.add("hidden");
+            }
+        }
+    }
+};
 
 // INIT FUNCTIONS
 
 export const startUp = () => {
     console.log("StartingUp", canvas);
-    debugSelect.addEventListener("change", debugPanal);
     clickDetect(canvas);
     addMenuOptions();
     setSize(size);
     setChar("s");
-    // textModeChange(true);
-    // pausedChange(true);
-    // textModeSetUp();
+    textModeChange(true);
+    pausedChange(true);
+    textModeSetUp();
+    updateUI();
     reset();
 };
 
@@ -435,9 +534,11 @@ const InitArrays = () => {
 const createDimensions = () => {
     let indicator: number[] = [];
     let indicatorElemRect = indicatorElem.getBoundingClientRect();
+    canvas.value = "";
     if (indicatorElemRect) {
         indicator[0] = indicatorElemRect?.width;
         indicator[1] = indicatorElemRect?.height;
+        console.log({ ...indicator });
         let canvasSize = canvas.getBoundingClientRect();
         dimensions = {
             canvasWidth: canvasSize.width,
@@ -450,6 +551,7 @@ const createDimensions = () => {
             rows: Math.floor(canvasSize.height / indicator[1]),
             total: Math.floor(canvasSize.height / indicator[1]) * Math.floor(canvasSize.width / indicator[0]),
         };
+        console.log({ ...dimensions });
     }
 };
 
@@ -457,7 +559,9 @@ const createSymbolArray = () => {
     let str = new Array(dimensions.total).fill(elements["·"]);
     curSymbolArr = str;
     newSymbolArr = str;
-    console.log(str);
+
+    writetoDom();
+    console.log(str.length, canvas.value.length);
 };
 
 const createDirectionArrays = () => {
@@ -602,6 +706,7 @@ const gravity = (x: number, el: element) => {
                     if (
                         !southArr[dancePartnerIndex] ||
                         (typeof southArr[dancePartnerIndex] === "number" &&
+                            //@ts-ignore
                             curSymbolArr[southArr[dancePartnerIndex]].symbol !== "·" &&
                             curSymbolArr[x].velocity > 1)
                     ) {
@@ -683,6 +788,7 @@ const antiGravity = (x: number, el: element) => {
                     if (
                         !northArr[dancePartnerIndex] ||
                         (typeof northArr[dancePartnerIndex] === "number" &&
+                            //@ts-ignore
                             curSymbolArr[northArr[dancePartnerIndex]].symbol !== "·" &&
                             curSymbolArr[x].velocity < 0)
                     ) {
@@ -1303,6 +1409,7 @@ const getSurrounding = (x: number, leftToRight: boolean | null = null) => {
 const kyptoCheck = (x: number) => {
     let neighbours = getSurrounding(x);
     for (let i = 0; i < neighbours.length; i++) {
+        //@ts-ignore
         if (neighbours[i] !== false && curSymbolArr[neighbours[i]].kypto) {
             return false;
         }
