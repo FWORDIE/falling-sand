@@ -22,6 +22,7 @@ let size: number = 1;
 let loopID: number;
 let textMode: boolean = false;
 let paused: boolean = false;
+let inverted: boolean = false;
 
 const randomArrAmount = 1000;
 let randomArrNum = 0;
@@ -31,7 +32,6 @@ let yDeviceNum: null | number = null;
 
 export let framerate = 1000 / 24;
 var timer: number | undefined = undefined;
-
 
 const canvas = document.getElementById("Canvas") as HTMLTextAreaElement;
 var indicatorElem = document.getElementById("Indicator") as HTMLElement;
@@ -136,9 +136,18 @@ export const handleKey = debounce((e: KeyboardEvent) => {
         return;
     }
 
-    if (e.key === "R" && !e.shiftKey) {
+    if (e.key === "R" && e.shiftKey) {
         if (!e.repeat) {
             reset();
+        }
+
+        e.preventDefault(); // Prevents the addition of a new line in the text field
+        return;
+    }
+
+    if (e.key === "I" && e.shiftKey) {
+        if (!e.repeat) {
+            invertColour();
         }
 
         e.preventDefault(); // Prevents the addition of a new line in the text field
@@ -337,6 +346,13 @@ const pausedChange = (startUp = false, forced = false) => {
             console.log("Pause");
         }
     }
+    updateUI();
+};
+
+const invertColour = (startUp = false) => {
+    let main = document.getElementById("Main") as HTMLElement;
+    main.classList.toggle("inverted");
+
     updateUI();
 };
 

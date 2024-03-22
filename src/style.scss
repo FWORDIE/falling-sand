@@ -2,8 +2,7 @@
     font-family: "Bergen Mono";
 
     color-scheme: light dark;
-    --color: rgba(255, 255, 255, 0.87);
-    --background: rgba(29, 29, 29, 0.87);
+
 
     font-synthesis: none;
     text-rendering: optimizeLegibility;
@@ -26,6 +25,12 @@ main {
     background-color: var(--background);
     font-size: 12px;
     height: 100dvh;
+    --color: rgba(255, 255, 255, 1);
+    --background: rgba(29, 29, 29, 1);
+    &.inverted{
+        --color: rgba(29, 29, 29, 1);
+        --background: rgba(255, 255, 255, 1);
+    }
     .sidePanal {
         height: auto;
         display: flex;
@@ -43,21 +48,22 @@ main {
             column-gap: 1.5vw;
             row-gap: 0.5vw;
             flex-wrap: wrap;
-            
-            p,a {
+
+            p,
+            a {
                 display: block;
             }
             .logo {
                 font-weight: 700;
             }
-            .pair{
+            .pair {
                 display: flex;
                 gap: 5px;
-                .italic{
+                .italic {
                     font-style: italic;
                 }
 
-                &.hidden{
+                &.hidden {
                     display: none;
                 }
             }
@@ -98,7 +104,8 @@ main {
         user-select: none;
         border: none;
         outline: none;
-        background-color: var(--background);
+        background-color: var(--background) !important;
+        color: var(--color);
         resize: none;
         &:focus-visible {
             border: none;
@@ -107,10 +114,27 @@ main {
         }
         &::selection {
             color: var(--color);
-            // background: var(--background);
-            opacity: 0;
+            background: var(--background);
+        }
+        ::-moz-selection {
+            color: var(--color);
+            background: var(--background);
         }
 
+        ::-o-selection {
+            color: var(--color);
+            background: var(--background);
+        }
+
+        ::-ms-selection {
+            color: var(--color);
+            background: var(--background);
+        }
+
+        ::-webkit-selection {
+            color: var(--color);
+            background: var(--background);
+        }
     }
     #Indicator {
         position: absolute;
