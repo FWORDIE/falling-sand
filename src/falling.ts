@@ -23,6 +23,7 @@ let loopID: number;
 let textMode: boolean = false;
 let paused: boolean = false;
 let inverted: boolean = false;
+let clock = true;
 
 const randomArrAmount = 1000;
 let randomArrNum = 0;
@@ -132,7 +133,7 @@ export const handleKey = debounce((e: KeyboardEvent) => {
             pausedChange();
         }
 
-        e.preventDefault(); // Prevents the addition of a new line in the text field
+        e.preventDefault();
         return;
     }
 
@@ -141,7 +142,7 @@ export const handleKey = debounce((e: KeyboardEvent) => {
             reset();
         }
 
-        e.preventDefault(); // Prevents the addition of a new line in the text field
+        e.preventDefault();
         return;
     }
 
@@ -150,7 +151,7 @@ export const handleKey = debounce((e: KeyboardEvent) => {
             invertColour();
         }
 
-        e.preventDefault(); // Prevents the addition of a new line in the text field
+        e.preventDefault();
         return;
     }
 
@@ -159,7 +160,7 @@ export const handleKey = debounce((e: KeyboardEvent) => {
             console.log("Save");
             save();
         }
-        e.preventDefault(); // Prevents the addition of a new line in the text field
+        e.preventDefault();
         return;
     }
 
@@ -168,7 +169,7 @@ export const handleKey = debounce((e: KeyboardEvent) => {
             console.log("Load");
             load();
         }
-        e.preventDefault(); // Prevents the addition of a new line in the text field
+        e.preventDefault();
         return;
     }
 
@@ -176,14 +177,17 @@ export const handleKey = debounce((e: KeyboardEvent) => {
         setSize(parseInt(e.key));
         return true;
     }
+
     if (alphabet.includes(e.key) && !textMode) {
         setChar(e.key);
         return true;
     }
+
     if (e.key === "Tab") {
         textModeChange();
         return true;
     }
+
     if (!e.shiftKey || e.key === "Enter") {
         setChar("·");
         return true;
@@ -626,6 +630,7 @@ const iterateOver = () => {
             }
         }
     }
+    clock = !clock;
 };
 
 const doEffects = (x: number, pass: number, direction: boolean) => {
@@ -644,6 +649,7 @@ const doEffects = (x: number, pass: number, direction: boolean) => {
         if (el.acidic && kyptoCheck(x)) acid(x);
         if (el.explode) explode(x);
         if (el.decay && kyptoCheck(x)) decay(x, el);
+        if(el.pair != null) moved = morph(x,el)
     } else {
         if (el.bug && kyptoCheck(x)) doBugSexOrDie(x, el);
         if (el.insect && kyptoCheck(x)) insecticide(x, el);
@@ -656,6 +662,7 @@ const doEffects = (x: number, pass: number, direction: boolean) => {
     //Movements
     if (pass !== -1) {
         if (el.graved) moved = gravity(x, el);
+        
     } else {
         if (el.antiGraved) moved = antiGravity(x, el);
         if (el.grow && kyptoCheck(x)) moved = grow(x, el);
@@ -667,6 +674,22 @@ const doEffects = (x: number, pass: number, direction: boolean) => {
     if (pass === -1) {
     }
 };
+
+const morph = (x: number, el: element) => {
+    let neighbours = getSurrounding(x);
+    let pairs = neighbours.filter((index) => {
+        if (typeof index === "number" && curSymbolArr[index].id === el.pair) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+    if(pairs.length>0){
+        let swapIndex = randomNumCheck() ?  x : randomIntFromInterval(0,pairs.length);
+        //@ts-ignore
+        curSymbolArr[swapIndex] = {...elements[el.replace]}
+    }
+}
 
 const slide = (x: number, el: element, direction: boolean) => {
     let vol = curSymbolArr[x].horizontalVelocity - Math.sign(curSymbolArr[x].horizontalVelocity) * el.friction * 2;
@@ -718,7 +741,12 @@ const gravity = (x: number, el: element) => {
             }
             for (let dis = Math.floor(curSymbolArr[x].velocity); dis >= 0; dis--) {
                 var dancePartnerIndex = southArr[x + dimensions.columns * dis];
-                if (dancePartnerIndex && curSymbolArr[dancePartnerIndex].density < el.density && !curSymbolArr[dancePartnerIndex].static) {
+                if (
+                    dancePartnerIndex &&
+                    curSymbolArr[dancePartnerIndex].density < el.density &&
+                    !curSymbolArr[dancePartnerIndex].static &&
+                    curSymbolArr[dancePartnerIndex].liquidy
+                ) {
                     if (
                         !southArr[dancePartnerIndex] ||
                         (typeof southArr[dancePartnerIndex] === "number" &&
@@ -730,7 +758,7 @@ const gravity = (x: number, el: element) => {
                             hatch(x);
                         }
                         curSymbolArr[x].horizontalVelocity = (((100 / el.density) * curSymbolArr[x].velocity) / 2) * (randomNumCheck() ? -1 : 1);
-                        if (curSymbolArr[x].horizontalVelocity < 1 && curSymbolArr[x].horizontalVelocity > -1 && el.liquidy) {
+                        if (curSymbolArr[x].horizontalVelocity < 1 && curSymbolArr[x].horizontalVelocity > -1 && (el.liquidy || el.id == 'a')) {
                             curSymbolArr[x].horizontalVelocity = 1;
                         }
                     }
@@ -782,9 +810,28 @@ const gravity = (x: number, el: element) => {
     }
     curSymbolArr[x].velocity = 0;
     if (!el.burn) {
-        curSymbolArr[x].symbol = curSymbolArr[x].symbol.toUpperCase();
+        curSymbolArr[x].symbol = solidCasing(x, el);
     }
     return false;
+};
+
+const solidCasing = (x: number, el: element) => {
+    const neighbours = getSurrounding(x);
+    const friends = neighbours.filter((index) => {
+        if (typeof index === "number" && !curSymbolArr[index].null) {
+            return true;
+        } else {
+            return false;
+        }
+    }) as number[];
+
+    let tempSymbol = curSymbolArr[x].id.toUpperCase();
+    if (friends.length < 6 && southArr[x] && northArr[x] && westArr[x] && eastArr[x]) {
+        tempSymbol = tempSymbol.toLowerCase();
+    } else if (friends.length < 3) {
+        tempSymbol = tempSymbol.toLowerCase();
+    }
+    return tempSymbol;
 };
 
 const antiGravity = (x: number, el: element) => {
@@ -862,8 +909,10 @@ const antiGravity = (x: number, el: element) => {
             }
         }
     }
-    curSymbolArr[x].symbol = curSymbolArr[x].symbol.toUpperCase();
     curSymbolArr[x].velocity = 0;
+    if (!el.burn) {
+        curSymbolArr[x].symbol = solidCasing(x, el);
+    }
     return false;
 };
 
@@ -872,10 +921,8 @@ const fire = (x: number, el: element) => {
         curSymbolArr[x].life = curSymbolArr[x].life - el.halfLife;
     }
 
-    if (curSymbolArr[x].symbol == curSymbolArr[x].symbol.toLowerCase()) {
-        curSymbolArr[x].symbol = el.symbol.toUpperCase();
-    } else {
-        curSymbolArr[x].symbol = el.symbol.toLowerCase();
+    if (clock) {
+        invertCase(x);
     }
 
     if (curSymbolArr[x].life <= 0) {
@@ -893,7 +940,7 @@ const fire = (x: number, el: element) => {
     }) as number[];
 
     const Water = possibleDirections.filter((index) => {
-        if (typeof index === "number" && curSymbolArr[index].symbol.toLowerCase() === "w") {
+        if (typeof index === "number" && curSymbolArr[index].id=== "w") {
             return true;
         } else {
             return false;
@@ -927,7 +974,7 @@ const fire = (x: number, el: element) => {
 const grow = (x: number, el: element) => {
     const possibleDirections = [northArr[x], northEastArr[x], eastArr[x], southEastArr[x], southArr[x], southWestArr[x], westArr[x], northWestArr[x]];
     const water = possibleDirections.filter((index) => {
-        if (typeof index === "number" && curSymbolArr[index].symbol.toLowerCase() == "w") {
+        if (typeof index === "number" && curSymbolArr[index].id == "w") {
             return true;
         } else {
             return false;
@@ -976,7 +1023,11 @@ const grow = (x: number, el: element) => {
         curSymbolArr[dancePartner].growth = el.growth + 1;
         curSymbolArr[dancePartner].static = true;
         curSymbolArr[dancePartner].graved = false;
+        curSymbolArr[dancePartner].symbol = curSymbolArr[dancePartner].symbol.toLowerCase();
         curSymbolArr[x].growing = false;
+        if (el.growth < 4) {
+            curSymbolArr[x].symbol = curSymbolArr[x].symbol.toUpperCase();
+        }
         return true;
     }
 
@@ -996,6 +1047,33 @@ const bloom = (x: number) => {
 
     for (let i = 0; i < growthGiver.length; i++) {
         curSymbolArr[growthGiver[i]] = { ...elements["p"] };
+        curSymbolArr[growthGiver[i]].symbol = clock ? curSymbolArr[growthGiver[i]].symbol.toUpperCase() : curSymbolArr[growthGiver[i]].symbol.toLowerCase();
+    }
+
+    if (randomNumCheck(0.25)) {
+        const possibleDirections = [northEastArr[x], northWestArr[x], southEastArr[x], southWestArr[x]];
+
+        const growthGiver = possibleDirections.filter((index) => {
+            if (typeof index === "number" && (curSymbolArr[index].growGiver || curSymbolArr[index].null)) {
+                return true;
+            } else {
+                return false;
+            }
+        }) as number[];
+
+        for (let i = 0; i < growthGiver.length; i++) {
+            curSymbolArr[growthGiver[i]] = { ...elements["p"] };
+            curSymbolArr[growthGiver[i]].symbol = !clock
+                ? curSymbolArr[growthGiver[i]].symbol.toUpperCase()
+                : curSymbolArr[growthGiver[i]].symbol.toLowerCase();
+        }
+    }
+};
+
+const lifeSpan = (x: number) => {
+    curSymbolArr[x].life = curSymbolArr[x].life - curSymbolArr[x].halfLife;
+    if (clock) {
+        invertCase(x);
     }
 };
 
@@ -1013,10 +1091,8 @@ const explode = (index: number, overide: boolean = false) => {
         }
     });
 
-    if (overide || fireNeighbours.length > 0 || curSymbolArr[index].exploding) {
-        curSymbolArr[index].exploding = true;
-        curSymbolArr[index].life = curSymbolArr[index].life - 0.05;
-        invertCase(index);
+    if (overide || fireNeighbours.length > 0 || curSymbolArr[index].life < 1) {
+        lifeSpan(index);
     }
 
     if (curSymbolArr[index].life < 0) {
@@ -1042,6 +1118,11 @@ const explode = (index: number, overide: boolean = false) => {
 };
 
 const xDevice = (index: number) => {
+    if (curSymbolArr[index].life >0) {
+        lifeSpan(index);
+        return false;
+    }
+
     let amountBig = dimensions.columns + 1;
     let amountSmall = dimensions.columns - 1;
     let startBig = index % amountBig;
@@ -1065,8 +1146,13 @@ const xDevice = (index: number) => {
 };
 
 const zDevice = (index: number) => {
-    if (zDeviceNum === null) {
+    
+    if (zDeviceNum === null && curSymbolArr[index].life < 0) {
         zDeviceNum = index;
+    }else if(zDeviceNum !== null && curSymbolArr[index].life < 0){
+        curSymbolArr[index].life = 0.25
+    }else{
+        lifeSpan(index)
     }
 };
 
@@ -1082,8 +1168,12 @@ const zDeviceTrigger = (index: number) => {
 };
 
 const yDevice = (index: number) => {
-    if (yDeviceNum === null) {
+    if (yDeviceNum === null && curSymbolArr[index].life < 0) {
         yDeviceNum = index;
+    }else if(yDeviceNum !== null && curSymbolArr[index].life < 0){
+        curSymbolArr[index].life = 0.25
+    }else{
+        lifeSpan(index)
     }
 };
 
@@ -1298,8 +1388,7 @@ const swap = (a: number, b: number) => {
     curSymbolArr[b] = temp;
     curSymbolArr[a].symbol = randomNumCheck() ? curSymbolArr[a].symbol.toUpperCase() : curSymbolArr[a].symbol.toLowerCase();
     curSymbolArr[b].symbol = randomNumCheck() ? curSymbolArr[b].symbol.toUpperCase() : curSymbolArr[b].symbol.toLowerCase();
-    invertCase(a);
-    invertCase(b);
+
 };
 
 const destroy = (x: number) => {

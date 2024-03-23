@@ -35,16 +35,17 @@ export type element = {
     exploding: boolean;
     quartz: boolean;
     jam: boolean;
-    kypto:boolean;
-    x:boolean;
-    z:boolean;
-    y:boolean;
-    insect:boolean;
-    plant:boolean;
-    water:Boolean;
-    decay:boolean;
-    id:string
-
+    kypto: boolean;
+    x: boolean;
+    z: boolean;
+    y: boolean;
+    insect: boolean;
+    plant: boolean;
+    water: Boolean;
+    decay: boolean;
+    id: string;
+    pair: string | null;
+    replace: string | null;
 };
 
 const DEFAULTS: Partial<element> = {
@@ -60,7 +61,7 @@ const DEFAULTS: Partial<element> = {
     flammable: false,
     static: false,
     life: 1,
-    halfLife: 0.1,
+    halfLife: 0.009,
     horizontalVelocity: 0,
     velocity: 0,
     acc: 0.3,
@@ -80,15 +81,17 @@ const DEFAULTS: Partial<element> = {
     exploding: false,
     quartz: false,
     jam: false,
-    kypto:false,
-    x:false,
-    z:false,
-    y:false,
-    insect:false,
-    plant:false,
-    water:false,
-    decay:false,
-    id:''
+    kypto: false,
+    x: false,
+    z: false,
+    y: false,
+    insect: false,
+    plant: false,
+    water: false,
+    decay: false,
+    id: "",
+    pair: null,
+    replace: null,
 };
 
 export const addElement = (key: string, elementConfig: Partial<element>) => {
@@ -98,7 +101,7 @@ export const addElement = (key: string, elementConfig: Partial<element>) => {
     } as element;
 
     elements[key] = configWithDefaults;
-    elements[key].id = elements[key].symbol
+    elements[key].id = elements[key].symbol;
 };
 
 addElement("s", {
@@ -111,6 +114,8 @@ addElement("s", {
     growGiver: true,
     horizontalMax: 2,
     desc: "it falls n' heaps",
+    pair: "n",
+    replace: "t",
 });
 
 addElement("e", {
@@ -144,12 +149,14 @@ addElement("a", {
     symbol: "a",
     name: "Ash",
     acc: 0.1,
-    max: 2,
+    max: 1,
     density: 40,
     friction: 0.1,
     horizontalMax: 3,
     growGiver: true,
     desc: "it falls, heaps n' nurturers",
+    pair: "d",
+    replace: "v",
 });
 
 addElement("b", {
@@ -165,7 +172,6 @@ addElement("b", {
     desc: "has bug sex or dies",
 });
 
-
 addElement("i", {
     symbol: "i",
     name: "Insecticide",
@@ -176,8 +182,9 @@ addElement("i", {
     halfLife: 0.1,
     life: 1,
     desc: "kills bugs and plants",
+    pair: "a",
+    replace: "f",
 });
-
 
 addElement("d", {
     symbol: "d",
@@ -204,6 +211,8 @@ addElement("c", {
     graved: false,
     liquidy: true,
     desc: "abstract gas",
+    pair: "i",
+    replace: "w",
 });
 
 addElement("n", {
@@ -247,6 +256,8 @@ addElement("g", {
     life: 1,
     halfLife: 0.05,
     desc: "sand but funky",
+    pair: "m",
+    replace: "o",
 });
 
 addElement("h", {
@@ -277,7 +288,7 @@ addElement("v", {
     growGiver: true,
     flammable: true,
     growing: true,
-    plant:true,
+    plant: true,
     desc: "grows when it can",
 });
 
@@ -294,7 +305,7 @@ addElement("p", {
     static: true,
     graved: false,
     flammable: true,
-    plant:true,
+    plant: true,
     desc: "parts of a flower",
 });
 
@@ -378,6 +389,8 @@ addElement("q", {
     quartz: true,
     desc: "nothing effects this rock",
     acidSafe: true,
+    pair: "c",
+    replace: "g",
 });
 
 addElement("k", {
@@ -389,7 +402,7 @@ addElement("k", {
     friction: 0.99,
     static: true,
     graved: false,
-    kypto:true,
+    kypto: true,
     desc: "stops everything from working",
     acidSafe: true,
 });
@@ -403,7 +416,7 @@ addElement("u", {
     friction: 0.1,
     static: true,
     graved: false,
-    decay:true,
+    decay: true,
     desc: "decays to others",
 });
 
@@ -418,7 +431,7 @@ addElement("w", {
     horizontalMax: 4,
     growGiver: true,
     desc: "tap",
-    water:true
+    water: true,
 });
 
 addElement("j", {
@@ -440,10 +453,11 @@ addElement("x", {
     density: 90,
     acc: 0.5,
     max: 10,
+    halfLife: 0.04,
     friction: 0.99,
     static: true,
     graved: false,
-    x:true,
+    x: true,
     desc: "I ran out of ideas",
 });
 
@@ -453,10 +467,12 @@ addElement("z", {
     density: 90,
     acc: 0.5,
     max: 10,
+    halfLife: 0.02,
     friction: 0.99,
+
     static: true,
     graved: false,
-    z:true,
+    z: true,
     desc: "I ran out of ideas",
 });
 
@@ -466,9 +482,10 @@ addElement("y", {
     density: 90,
     acc: 0.5,
     max: 10,
+    halfLife: 0.02,
     friction: 0.99,
     static: true,
     graved: false,
-    y:true,
+    y: true,
     desc: "I ran out of ideas",
 });

@@ -95,7 +95,6 @@ main {
         -moz-user-select: -moz-none;
         -khtml-user-select: none;
         -webkit-user-select: none;
-        // text-transform: lowercase;
         -webkit-touch-callout: none;
         -webkit-user-select: none;
         -khtml-user-select: none;
@@ -110,30 +109,30 @@ main {
         &:focus-visible {
             border: none;
             outline: none;
-            background-color: var(--background);
+            background-color: transparent;
         }
         &::selection {
             color: var(--color);
-            background: var(--background);
+            background: transparent;
         }
         ::-moz-selection {
             color: var(--color);
-            background: var(--background);
+            background: transparent;
         }
 
         ::-o-selection {
             color: var(--color);
-            background: var(--background);
+            background: transparent;
         }
 
         ::-ms-selection {
             color: var(--color);
-            background: var(--background);
+            background: transparent;
         }
 
         ::-webkit-selection {
             color: var(--color);
-            background: var(--background);
+            background: transparent;
         }
     }
     #Indicator {
