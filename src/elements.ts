@@ -46,6 +46,7 @@ export type element = {
     id: string;
     pair: string | null;
     replace: string | null;
+    done: boolean;
 };
 
 const DEFAULTS: Partial<element> = {
@@ -60,7 +61,7 @@ const DEFAULTS: Partial<element> = {
     burn: false,
     flammable: false,
     static: false,
-    life: 1,
+    life: 2,
     halfLife: 0.009,
     horizontalVelocity: 0,
     velocity: 0,
@@ -92,6 +93,7 @@ const DEFAULTS: Partial<element> = {
     id: "",
     pair: null,
     replace: null,
+    done: false,
 };
 
 export const addElement = (key: string, elementConfig: Partial<element>) => {
@@ -316,7 +318,7 @@ addElement("m", {
     max: -3,
     density: 5,
     friction: 0,
-    fuel: 1,
+    fuel: 0.5,
     antiGraved: true,
     graved: false,
     liquidy: true,
@@ -331,7 +333,7 @@ addElement("l", {
     acc: 0.4,
     max: 8,
     friction: 0.99,
-    fuel: 10,
+    fuel: 5,
     flammable: true,
     nonslide: true,
     static: true,
@@ -417,6 +419,8 @@ addElement("u", {
     static: true,
     graved: false,
     decay: true,
+    flammable: true,
+    fuel:10,
     desc: "decays to others",
 });
 
@@ -453,11 +457,13 @@ addElement("x", {
     density: 90,
     acc: 0.5,
     max: 10,
-    halfLife: 0.04,
+    halfLife: 0.01,
     friction: 0.99,
-    static: true,
-    graved: false,
+    static: false,
+    graved: true,
     x: true,
+    done: false,
+
     desc: "I ran out of ideas",
 });
 
@@ -469,9 +475,10 @@ addElement("z", {
     max: 10,
     halfLife: 0.02,
     friction: 0.99,
+    done: false,
 
-    static: true,
-    graved: false,
+    static: false,
+    graved: true,
     z: true,
     desc: "I ran out of ideas",
 });
@@ -482,10 +489,11 @@ addElement("y", {
     density: 90,
     acc: 0.5,
     max: 10,
-    halfLife: 0.02,
+    halfLife: 0.03,
     friction: 0.99,
-    static: true,
-    graved: false,
+    static: false,
+    graved: true,
     y: true,
+    done: false,
     desc: "I ran out of ideas",
 });

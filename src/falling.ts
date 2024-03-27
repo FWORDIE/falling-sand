@@ -31,6 +31,7 @@ let randomArrNum = 0;
 
 let zDeviceNum: null | number = null;
 let yDeviceNum: null | number = null;
+let xDeviceNum: null | number = null;
 
 export let framerate = 1000 / 24;
 var timer: number | undefined = undefined;
@@ -74,13 +75,30 @@ const writeOld = () => {
 
 const writetoDom = () => {
     let visArr: string[] | number[] = new Array(curSymbolArr.length).fill("").map((element, index) => {
+        if (curSymbolArr[index] === undefined) {
+            curSymbolArr[index] = { ...elements["·"] };
+        }
         return curSymbolArr[index].symbol;
     });
 
     if (canvas) {
         const string = visArr.join("");
+
         oldSymbolArr = newSymbolArr.slice(0);
+        if (oldSymbolArr.length != curSymbolArr.length) {
+            console.log("HELP");
+        }
         canvas.value = string;
+        // console.log(string.length, visArr.length, curSymbolArr.length);
+        // if (string.length != visArr.length) {
+        //     console.log(string.slice(0), visArr.slice(0));
+        //     visArr.forEach((element, index) => {
+        //         if (element === undefined) {
+        //             console.log(`Element ${index}: '${element}' (Length: ${element})`);
+        //             console.log(index,{...curSymbolArr[index]})
+        //         }
+        //     });
+        // }
     }
 };
 
@@ -105,8 +123,7 @@ function debounce(func: (...args: any[]) => void, timeout = 100): (...args: any[
 }
 
 export const handleKey = debounce((e: KeyboardEvent) => {
-
-    console.log(e)
+    console.log(e);
     if (e.key === "ArrowRight") {
         if (paused) {
             console.log("Next");
@@ -176,7 +193,7 @@ export const handleKey = debounce((e: KeyboardEvent) => {
         return;
     }
 
-    if (e.key === "!" && e.shiftKey) {
+    if (e.code === "Digit1" && e.shiftKey) {
         if (!e.repeat) {
             console.log("Text Fommater");
             textFormatter(presets[1], true);
@@ -185,7 +202,7 @@ export const handleKey = debounce((e: KeyboardEvent) => {
         return;
     }
 
-    if (e.key === ")" && e.shiftKey) {
+    if (e.code === "Digit0" && e.shiftKey) {
         if (!e.repeat) {
             console.log("Text Fommater");
             textFormatter(presets[0]);
@@ -194,8 +211,7 @@ export const handleKey = debounce((e: KeyboardEvent) => {
         return;
     }
 
-
-    if (e.key === "@" && e.shiftKey) {
+    if (e.code === "Digit2" && e.shiftKey) {
         if (!e.repeat) {
             console.log("Text Fommater");
             textFormatter(presets[2]);
@@ -659,6 +675,9 @@ const iterateOver = () => {
             if (yDeviceNum != null) {
                 yDeviceTrigger(yDeviceNum);
             }
+            if (xDeviceNum != null) {
+                xDeviceTrigger(xDeviceNum);
+            }
         }
     }
     clock = !clock;
@@ -700,7 +719,7 @@ const doEffects = (x: number, pass: number, direction: boolean) => {
         if (el.chaotic && !moved) moved = chaosMovement(x, el);
     }
 
-    if (el.horizontalVelocity !== 0 && !moved && pass !== -1) slid = slide(x, el, direction);
+    if (el.horizontalVelocity !== 0 && !moved && pass !== -1 && el.static === false) slid = slide(x, el, direction);
 
     if (pass === -1) {
     }
@@ -719,7 +738,9 @@ const morph = (x: number, el: element) => {
         let swapIndex = randomNumCheck() ? x : randomIntFromInterval(0, pairs.length);
         //@ts-ignore
         curSymbolArr[swapIndex] = { ...elements[el.replace] };
+        return true;
     }
+    return false;
 };
 
 const slide = (x: number, el: element, direction: boolean) => {
@@ -744,7 +765,6 @@ const slide = (x: number, el: element, direction: boolean) => {
     for (let dis = 1; dis < Math.floor(Math.abs(vol)) + 1; dis++) {
         const tempDancePartnerIndex = x + Math.sign(vol) * dis;
         if (Math.floor(tempDancePartnerIndex / dimensions.columns) == Math.floor(x / dimensions.columns) && curSymbolArr[tempDancePartnerIndex].null) {
-            // curSymbolArr[x].horizontalVelocity = curSymbolArr[x].horizontalVelocity - (Math.sign(curSymbolArr[x].horizontalVelocity) * el.friction * (dis));
             dancePartnerIndex = tempDancePartnerIndex;
         } else {
             break;
@@ -840,7 +860,7 @@ const gravity = (x: number, el: element) => {
         }
     }
     curSymbolArr[x].velocity = 0;
-    if (!el.burn && !el.egg) {
+    if (!el.burn && !el.egg && !el.x && !el.y && !el.z) {
         curSymbolArr[x].symbol = solidCasing(x, el);
     }
     return false;
@@ -1149,72 +1169,127 @@ const explode = (index: number, overide: boolean = false) => {
 };
 
 const xDevice = (index: number) => {
-    if (curSymbolArr[index].life > 0) {
-        lifeSpan(index);
+    // if(curSymbolArr[index].done){
+    //     return false
+    // }
+    // if (curSymbolArr[index].life > 0 || curSymbolArr[index].velocity >0) {
+    //     lifeSpan(index);
+    //     return false;
+    // }
+
+    // let amountBig = dimensions.columns + 1;
+    // let amountSmall = dimensions.columns - 1;
+    // let startBig = index % amountBig;
+    // let startSmall = index % amountSmall;
+    // let destroyArray = [];
+    // for (let big = startBig; big <= dimensions.total; big += amountBig) {
+    //     destroyArray.push(big);
+    // }
+    // for (let small = startSmall; small < dimensions.total; small += amountSmall) {
+    //     destroyArray.push(small);
+    // }
+    // for (let x = 0; x < destroyArray.length; x++) {
+    //     let pos = destroyArray[x];
+    //     if (curSymbolArr[pos].explode) {
+    //         explode(pos, true);
+    //     } else {
+    //         destroy(pos);
+    //     }
+    // }
+    // destroy(index);
+    if (curSymbolArr[index].done) {
         return false;
     }
+    if (xDeviceNum === null && curSymbolArr[index].life < 0) {
+        xDeviceNum = index;
+    } else if (xDeviceNum !== null && curSymbolArr[index].life < 0) {
+        curSymbolArr[index].life = 0.5;
+    } else if (curSymbolArr[index].velocity == 0) {
+        lifeSpan(index);
+    }
+};
 
-    let amountBig = dimensions.columns + 1;
-    let amountSmall = dimensions.columns - 1;
-    let startBig = index % amountBig;
-    let startSmall = index % amountSmall;
-    let destroyArray = [];
-    for (let big = startBig; big <= dimensions.total; big += amountBig) {
-        destroyArray.push(big);
+const xDeviceTrigger = (index: number) => {
+    if (eastArr[index] !== false && westArr[index] !== false && northArr[index] !== false && southArr[index] !== false) {
+        let tempA = { ...curSymbolArr[eastArr[index]] };
+        let tempB = { ...curSymbolArr[southArr[index]] };
+        let tempC = { ...curSymbolArr[westArr[index]] };
+        let tempD = { ...curSymbolArr[northArr[index]] };
+
+        curSymbolArr[eastArr[index]] = tempB;
+        curSymbolArr[southArr[index]] = tempC;
+        curSymbolArr[westArr[index]] = tempD;
+        curSymbolArr[northArr[index]] = tempA;
     }
-    for (let small = startSmall; small < dimensions.total; small += amountSmall) {
-        destroyArray.push(small);
-    }
-    for (let x = 0; x < destroyArray.length; x++) {
-        let pos = destroyArray[x];
-        if (curSymbolArr[pos].explode) {
-            explode(pos, true);
-        } else {
-            destroy(pos);
-        }
-    }
-    destroy(index);
+
+    curSymbolArr[index].done = true;
+    xDeviceNum = null;
 };
 
 const zDevice = (index: number) => {
+    if (curSymbolArr[index].done) {
+        return false;
+    }
     if (zDeviceNum === null && curSymbolArr[index].life < 0) {
         zDeviceNum = index;
     } else if (zDeviceNum !== null && curSymbolArr[index].life < 0) {
-        curSymbolArr[index].life = 0.25;
-    } else {
+        curSymbolArr[index].life = 0.5;
+    } else if (curSymbolArr[index].velocity == 0) {
         lifeSpan(index);
     }
 };
 
 const zDeviceTrigger = (index: number) => {
-    destroy(index);
-    let times = index % dimensions.columns;
-    console.log(times, index);
-    while (times--) {
-        var temp = curSymbolArr.shift() as element;
-        curSymbolArr.push(temp);
+    // destroy(index);
+    // let times = index % dimensions.columns;
+    // console.log(times, index);
+    // while (times--) {
+    //     var temp = curSymbolArr.shift() as element;
+    //     curSymbolArr.push(temp);
+    // }
+    if (eastArr[index] !== false && westArr[index] !== false) {
+        let tempA = { ...curSymbolArr[eastArr[index]] };
+        let tempB = { ...curSymbolArr[westArr[index]] };
+
+        curSymbolArr[eastArr[index]] = tempB;
+        curSymbolArr[westArr[index]] = tempA;
     }
+
+    curSymbolArr[index].done = true;
     zDeviceNum = null;
 };
 
 const yDevice = (index: number) => {
+    if (curSymbolArr[index].done) {
+        return false;
+    }
     if (yDeviceNum === null && curSymbolArr[index].life < 0) {
         yDeviceNum = index;
     } else if (yDeviceNum !== null && curSymbolArr[index].life < 0) {
-        curSymbolArr[index].life = 0.25;
-    } else {
+        curSymbolArr[index].life = 0.5;
+    } else if (curSymbolArr[index].velocity == 0) {
         lifeSpan(index);
     }
 };
 
 const yDeviceTrigger = (index: number) => {
-    destroy(index);
-    let times = (index % dimensions.columns) * dimensions.columns;
-    console.log(times, index);
-    while (times--) {
-        var temp = curSymbolArr.shift() as element;
-        curSymbolArr.push(temp);
+    // destroy(index);
+    // let times = (index % dimensions.columns) * dimensions.columns;
+    // console.log(times, index);
+    // while (times--) {
+    //     var temp = curSymbolArr.shift() as element;
+    //     curSymbolArr.push(temp);
+    // }
+
+    if (northArr[index] !== false && southArr[index] !== false) {
+        let tempA = { ...curSymbolArr[northArr[index]] };
+        let tempB = { ...curSymbolArr[southArr[index]] };
+
+        curSymbolArr[northArr[index]] = tempB;
+        curSymbolArr[southArr[index]] = tempA;
     }
+
+    curSymbolArr[index].done = true;
     yDeviceNum = null;
 };
 
@@ -1237,7 +1312,7 @@ const decay = (x: number, el: element) => {
         const chosenDirection = notAirDirections[randomIntFromInterval(0, notAirDirections.length - 1)];
         // For for when we have all elements
         const alphabet = "abcdefghijklmnopqrstuvwxyz·";
-        const firstelement = alphabet[randomIntFromInterval(0, alphabet.length)];
+        const firstelement = alphabet[randomIntFromInterval(0, alphabet.length-1)];
         curSymbolArr[chosenDirection] = { ...elements[firstelement] };
         curSymbolArr[x].life = -el.halfLife;
     }
@@ -1266,7 +1341,6 @@ const chaosMovement = (x: number, el: element) => {
             if (randomNumCheck(0.1)) {
                 curSymbolArr[x].life = curSymbolArr[x].life - 0.01;
             }
-            console.log("stuck");
             return false;
         }
     }
@@ -1579,10 +1653,10 @@ const replaceNonAlphabetChars = (str: string) => {
 };
 
 const textFormatter = (str: string, edge = false) => {
-    pausedChange(false, true)
+    pausedChange(false, true);
     let startXY = Math.floor(dimensions.columns / 10);
-    if(edge){
-        startXY = 1
+    if (edge) {
+        startXY = 1;
     }
     const paras: string[] = str.split(/\r?\n|\r|\n/g);
     let words = paras
@@ -1590,9 +1664,11 @@ const textFormatter = (str: string, edge = false) => {
             return !(para === "");
         })
         .map((para) => {
-            return replaceNonAlphabetChars(para).split(/·| /).filter((word) => {
-                return !(word === "");
-            });
+            return replaceNonAlphabetChars(para)
+                .split(/·| /)
+                .filter((word) => {
+                    return !(word === "");
+                });
         })
         .filter((para) => {
             return !(para.length === 0);
@@ -1600,62 +1676,55 @@ const textFormatter = (str: string, edge = false) => {
     let x = startXY;
     let y = startXY;
 
-    if(edge){
-        words = [words.flat(1)]
+    if (edge) {
+        words = [words.flat(1)];
     }
 
-    console.log(words)
+    const maxLength = dimensions.columns - 2 * startXY;
 
-    const maxLength = dimensions.columns - (2 * startXY)
-
-    const writeWord = (x:number, y:number, word:string) => {
-        const letters = word.split("")
-        console.log(word)
-        letters.forEach(letter => {
-            let num = ((dimensions.columns * y) + x)
-            if(elements[letter.toLowerCase()]){
-                curSymbolArr[num] = {...elements[letter.toLowerCase()]}
-                curSymbolArr[num].symbol = letter
+    const writeWord = (x: number, y: number, word: string) => {
+        const letters = word.split("");
+        letters.forEach((letter) => {
+            let num = dimensions.columns * y + x;
+            if (elements[letter.toLowerCase()]) {
+                curSymbolArr[num] = { ...elements[letter.toLowerCase()] };
+                curSymbolArr[num].symbol = letter;
             }
 
-            x++
+            x++;
         });
+    };
 
-    }
-
-    words.every((paras,Paraindex) => {
-        if(y +1 > dimensions.rows - startXY){
-            return false
+    words.every((paras, Paraindex) => {
+        if (y + 1 > dimensions.rows - startXY) {
+            return false;
         }
-        paras.every((word,Wordindex) => {
-            if(Wordindex === 0 && Paraindex != 0){
-                y++
-                y++
-                x= startXY
+        paras.every((word, Wordindex) => {
+            if (Wordindex === 0 && Paraindex != 0) {
+                y++;
+                y++;
+                x = startXY;
             }
-            if(word.length + x <= maxLength){
-                writeWord(x,y,word)
-                x += word.length + 1
-                return true
- 
-
-            }else{
-                if(y < dimensions.rows - startXY -1){
-                    y++
-                    x= startXY;
-                    writeWord(x,y,word)
-                    x += word.length + 1
-                    return true
-
-                }else{
-                    return false
+            if (word.length + x <= maxLength) {
+                writeWord(x, y, word);
+                x += word.length + 1;
+                return true;
+            } else {
+                if (y < dimensions.rows - startXY - 1) {
+                    y++;
+                    x = startXY;
+                    writeWord(x, y, word);
+                    x += word.length + 1;
+                    return true;
+                } else {
+                    return false;
                 }
             }
-        })
-        return true
+        });
+        return true;
     });
 
-    writetoDom()
+    writetoDom();
 };
 
 //DEBUG
