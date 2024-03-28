@@ -61,7 +61,7 @@ const DEFAULTS: Partial<element> = {
     burn: false,
     flammable: false,
     static: false,
-    life: 2,
+    life: 1,
     halfLife: 0.009,
     horizontalVelocity: 0,
     velocity: 0,
@@ -95,7 +95,7 @@ const DEFAULTS: Partial<element> = {
     replace: null,
     done: false,
 };
-
+l
 export const addElement = (key: string, elementConfig: Partial<element>) => {
     const configWithDefaults: element = {
         ...DEFAULTS,
@@ -240,7 +240,7 @@ addElement("f", {
     friction: 0.5,
     graved: false,
     life: 1,
-    halfLife: 0.05,
+    halfLife: 0.1,
     burn: true,
     desc: "hot",
 });

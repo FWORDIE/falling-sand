@@ -793,7 +793,6 @@ const morph = (x: number, el: element) => {
     if (pairs.length > 0) {
         let swapIndex = randomNumCheck() ? x : pairs[randomIntFromInterval(0, pairs.length-1)];
         //@ts-ignore
-        console.log(el.pair,el.replace,swapIndex)
         curSymbolArr[swapIndex] = { ...elements[el.replace] };
         return true;
     }
@@ -1026,7 +1025,7 @@ const antiGravity = (x: number, el: element) => {
 };
 
 const fire = (x: number, el: element) => {
-    if (randomNumCheck(1 / (el.fuel * 2))) {
+    if (randomNumCheck(0.9)) {
         curSymbolArr[x].life = curSymbolArr[x].life - el.halfLife;
     }
 
