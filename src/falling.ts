@@ -25,6 +25,7 @@ let textMode: boolean = false;
 let paused: boolean = false;
 let inverted: boolean = false;
 let clock = true;
+let fresh = true;
 
 const randomArrAmount = 1000;
 let randomArrNum = 0;
@@ -89,16 +90,6 @@ const writetoDom = () => {
             console.log("HELP");
         }
         canvas.value = string;
-        // console.log(string.length, visArr.length, curSymbolArr.length);
-        // if (string.length != visArr.length) {
-        //     console.log(string.slice(0), visArr.slice(0));
-        //     visArr.forEach((element, index) => {
-        //         if (element === undefined) {
-        //             console.log(`Element ${index}: '${element}' (Length: ${element})`);
-        //             console.log(index,{...curSymbolArr[index]})
-        //         }
-        //     });
-        // }
     }
 };
 
@@ -219,6 +210,65 @@ export const handleKey = debounce((e: KeyboardEvent) => {
         e.preventDefault();
         return;
     }
+    if (e.code === "Digit3" && e.shiftKey) {
+        if (!e.repeat) {
+            console.log("Text Fommater");
+            textFormatter(presets[3],true);
+        }
+        e.preventDefault();
+        return;
+    }
+    if (e.code === "Digit4" && e.shiftKey) {
+        if (!e.repeat) {
+            console.log("Text Fommater");
+            textFormatter(presets[4],true);
+        }
+        e.preventDefault();
+        return;
+    }
+
+    if (e.code === "Digit5" && e.shiftKey) {
+        if (!e.repeat) {
+            console.log("Text Fommater");
+            textFormatter(presets[1], true);
+        }
+        e.preventDefault();
+        return;
+    }
+
+    if (e.code === "Digit6" && e.shiftKey) {
+        if (!e.repeat) {
+            console.log("Text Fommater");
+            textFormatter(presets[0]);
+        }
+        e.preventDefault();
+        return;
+    }
+
+    if (e.code === "Digit7" && e.shiftKey) {
+        if (!e.repeat) {
+            console.log("Text Fommater");
+            textFormatter(presets[2]);
+        }
+        e.preventDefault();
+        return;
+    }
+    if (e.code === "Digit8" && e.shiftKey) {
+        if (!e.repeat) {
+            console.log("Text Fommater");
+            textFormatter(presets[3],true);
+        }
+        e.preventDefault();
+        return;
+    }
+    if (e.code === "Digit9" && e.shiftKey) {
+        if (!e.repeat) {
+            console.log("Text Fommater");
+            textFormatter(presets[4],true);
+        }
+        e.preventDefault();
+        return;
+    }
 
     if (parseInt(e.key) && !textMode) {
         setSize(parseInt(e.key));
@@ -296,6 +346,10 @@ const mouseEvents = (pos: number[]) => {
     if (textMode) {
         paused = true;
         return false;
+    }
+    if(fresh && paused){
+        pausedChange()
+        fresh = false
     }
     //find index
     let trueX = Math.floor(pos[0] / dimensions.charWidth);
@@ -588,6 +642,8 @@ export const startUp = () => {
     textModeSetUp();
     updateUI();
     reset();
+    textFormatter(presets[0]);
+
 };
 
 const InitArrays = () => {
@@ -735,11 +791,13 @@ const morph = (x: number, el: element) => {
         }
     }) as number[];
     if (pairs.length > 0) {
-        let swapIndex = randomNumCheck() ? x : randomIntFromInterval(0, pairs.length);
+        let swapIndex = randomNumCheck() ? x : pairs[randomIntFromInterval(0, pairs.length-1)];
         //@ts-ignore
+        console.log(el.pair,el.replace,swapIndex)
         curSymbolArr[swapIndex] = { ...elements[el.replace] };
         return true;
     }
+
     return false;
 };
 
@@ -1656,7 +1714,7 @@ const textFormatter = (str: string, edge = false) => {
     pausedChange(false, true);
     let startXY = Math.floor(dimensions.columns / 10);
     if (edge) {
-        startXY = 1;
+        startXY = 0;
     }
     const paras: string[] = str.split(/\r?\n|\r|\n/g);
     let words = paras
@@ -1678,6 +1736,10 @@ const textFormatter = (str: string, edge = false) => {
 
     if (edge) {
         words = [words.flat(1)];
+        var replace = "/.{1,3}/"
+        const regex = new RegExp(replace,"g")
+        words[0] = str.match(new RegExp('.{1,' + dimensions.columns + '}', 'g'));
+        console.log(words)
     }
 
     const maxLength = dimensions.columns - 2 * startXY;
