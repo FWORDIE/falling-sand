@@ -95,7 +95,6 @@ const DEFAULTS: Partial<element> = {
     replace: null,
     done: false,
 };
-l
 export const addElement = (key: string, elementConfig: Partial<element>) => {
     const configWithDefaults: element = {
         ...DEFAULTS,
